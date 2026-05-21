@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Core Portfolio Dashboard — May 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#13314f; --navy2:#1c4a78; --blue:#2f6db5; --blue-soft:#e8f0fa;
+    --ink:#1f2a37; --muted:#647488; --line:#e3e8ef; --bg:#eef2f6; --card:#ffffff;
+    --green:#1e9e6a; --green-bg:#e6f4ee; --amber:#d99409; --amber-bg:#fbf3e0;
+    --red:#cc3f55; --red-bg:#fbe9ec; --shadow:0 1px 3px rgba(16,40,70,.08),0 8px 24px rgba(16,40,70,.06);
+    --bmh:#c0883b; --rbd:#2f6db5; --lsc:#2a9d8f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 22px 60px;}
+
+  /* Header */
+  header{background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 70%,#23598f 100%);color:#fff;
+    position:sticky;top:0;z-index:50;box-shadow:0 2px 14px rgba(8,24,44,.28);}
+  .head-inner{max-width:1320px;margin:0 auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .logo{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(255,255,255,.25);font-weight:700;font-size:18px;letter-spacing:.5px;}
+  .brand h1{font-size:20px;font-weight:650;letter-spacing:.2px;}
+  .brand p{font-size:12.5px;color:#bcd4ee;margin-top:2px;}
+  .period{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+  .period .badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:6px 14px;border-radius:30px;
+    font-weight:600;font-size:13px;letter-spacing:.4px;}
+  .period small{font-size:11px;color:#a9c5e3;}
+
+  /* Filter bar */
+  .filterbar{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:75px;z-index:40;box-shadow:0 2px 8px rgba(16,40,70,.05);}
+  .filter-inner{max-width:1320px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .filter-label{font-size:11.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);font-weight:600;margin-right:4px;}
+  .chip{border:1.4px solid var(--line);background:#fff;color:var(--ink);padding:8px 15px;border-radius:30px;font-size:13.5px;font-weight:550;
+    cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .16s ease;user-select:none;}
+  .chip:hover{border-color:var(--blue);color:var(--blue);}
+  .chip .dot{width:9px;height:9px;border-radius:50%;background:var(--line);}
+  .chip.active{color:#fff;border-color:transparent;box-shadow:var(--shadow);}
+  .chip.active .dot{background:#fff;}
+  .chip[data-key="consolidated"].active{background:var(--navy);}
+  .chip[data-key="BMH"].active{background:var(--bmh);}
+  .chip[data-key="RBD"].active{background:var(--rbd);}
+  .chip[data-key="LSC"].active{background:var(--lsc);}
+  .chip[data-key="BMH"] .dot{background:var(--bmh);}
+  .chip[data-key="RBD"] .dot{background:var(--rbd);}
+  .chip[data-key="LSC"] .dot{background:var(--lsc);}
+  .filter-sep{width:1px;height:24px;background:var(--line);margin:0 4px;}
+
+  /* Scope title */
+  .scope{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:26px 0 16px;}
+  .scope h2{font-size:22px;font-weight:650;color:var(--navy);}
+  .scope .sub{font-size:13px;color:var(--muted);}
+  .scope .sector-tag{font-size:12px;color:var(--muted);}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue);}
+  .kpi.k-budget::before{background:var(--navy);}
+  .kpi.k-prog::before{background:var(--blue);}
+  .kpi.k-ev::before{background:var(--green);}
+  .kpi.k-sv::before{background:var(--red);}
+  .kpi.k-cpi::before{background:#7a5cc0;}
+  .kpi .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;}
+  .kpi .val{font-size:25px;font-weight:700;color:var(--ink);margin-top:7px;letter-spacing:-.4px;}
+  .kpi .val .cur{font-size:13px;font-weight:600;color:var(--muted);margin-right:3px;}
+  .kpi .meta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px;}
+  .pill{font-size:11px;font-weight:650;padding:2px 8px;border-radius:20px;}
+  .pill.up{background:var(--green-bg);color:var(--green);}
+  .pill.down{background:var(--red-bg);color:var(--red);}
+  .pill.flat{background:var(--blue-soft);color:var(--blue);}
+  .mini-bar{height:6px;border-radius:6px;background:var(--line);margin-top:11px;overflow:hidden;position:relative;}
+  .mini-bar > i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--blue);display:block;}
+  .mini-bar > .plan-mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--navy);}
+
+  /* Section + grid */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);}
+  .panel .phead{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .panel .phead h3{font-size:15px;font-weight:650;color:var(--navy);}
+  .panel .pbody{padding:18px 20px;}
+  .grid-main{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-top:18px;}
+  @media(max-width:920px){.grid-main{grid-template-columns:1fr;}}
+
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+  .seg button{border:0;background:#fff;padding:6px 13px;font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:550;}
+  .seg button.on{background:var(--blue);color:#fff;}
+  .chart-box{position:relative;height:330px;}
+
+  /* EVM table */
+  .evm-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .evm-table td{padding:8px 6px;border-bottom:1px solid var(--line);}
+  .evm-table td:first-child{color:var(--muted);}
+  .evm-table td:last-child{text-align:right;font-weight:650;font-variant-numeric:tabular-nums;}
+  .evm-table tr:last-child td{border-bottom:0;}
+  .neg{color:var(--red);} .pos{color:var(--green);}
+
+  /* Gauges */
+  .gauges{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+  .gauge{text-align:center;padding:6px 4px;}
+  .gauge svg{width:100%;max-width:170px;height:auto;}
+  .gauge .gname{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.4px;margin-top:2px;}
+  .gauge .gnum{font-size:22px;font-weight:700;}
+
+  /* Comparison table */
+  .cmp{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .cmp th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:2px solid var(--line);}
+  .cmp th.num,.cmp td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .cmp td{padding:12px;border-bottom:1px solid var(--line);}
+  .cmp tbody tr:hover{background:#f7fafd;}
+  .cmp .pname{display:flex;align-items:center;gap:10px;font-weight:600;}
+  .cmp .swatch{width:10px;height:10px;border-radius:3px;}
+  .barcell{display:flex;align-items:center;gap:8px;}
+  .barcell .track{flex:1;height:8px;border-radius:6px;background:var(--line);overflow:hidden;min-width:60px;}
+  .barcell .fill{height:100%;border-radius:6px;}
+  .status-badge{font-size:11.5px;font-weight:650;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+  .st-green{background:var(--green-bg);color:var(--green);}
+  .st-amber{background:var(--amber-bg);color:var(--amber);}
+  .st-red{background:var(--red-bg);color:var(--red);}
+
+  /* Accordion project detail */
+  .section-title{font-size:13px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);font-weight:650;margin:30px 0 12px;display:flex;align-items:center;gap:10px;}
+  .section-title::after{content:"";flex:1;height:1px;background:var(--line);}
+  .acc{margin-bottom:14px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;}
+  .acc-head{padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;flex-wrap:wrap;}
+  .acc-head .accent{width:5px;align-self:stretch;border-radius:5px;min-height:40px;}
+  .acc-head .ah-title{display:flex;flex-direction:column;gap:3px;min-width:170px;}
+  .acc-head .ah-title b{font-size:16px;font-weight:650;color:var(--navy);}
+  .acc-head .ah-title span{font-size:12px;color:var(--muted);}
+  .acc-head .ah-stats{display:flex;gap:24px;flex-wrap:wrap;margin-left:auto;align-items:center;}
+  .ah-stat{display:flex;flex-direction:column;gap:1px;}
+  .ah-stat label{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;}
+  .ah-stat b{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .chev{transition:transform .25s ease;color:var(--muted);font-size:15px;margin-left:4px;}
+  .acc.open .chev{transform:rotate(180deg);}
+  .acc-body{display:none;padding:4px 20px 22px;border-top:1px solid var(--line);}
+  .acc.open .acc-body{display:block;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px;}
+  @media(max-width:820px){.detail-grid{grid-template-columns:1fr;}}
+  .phase-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px;}
+  .phase-row:last-child{border-bottom:0;}
+  .phase-row .pl{display:flex;flex-direction:column;}
+  .phase-row .pl b{font-weight:600;}
+  .phase-row .pl small{color:var(--muted);font-size:11.5px;}
+  .phase-row .pr{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;}
+  .mtable{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .mtable th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:7px 8px;border-bottom:1.5px solid var(--line);font-weight:600;}
+  .mtable td{padding:7px 8px;border-bottom:1px solid var(--line);}
+  .mtable td.num{text-align:right;}
+  .mini-prog{height:6px;width:54px;background:var(--line);border-radius:6px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px;}
+  .mini-prog i{display:block;height:100%;background:var(--green);}
+  .tag{font-size:10.5px;font-weight:650;padding:2px 8px;border-radius:18px;}
+  .tag.done{background:var(--green-bg);color:var(--green);}
+  .tag.progress{background:var(--blue-soft);color:var(--blue);}
+  .tag.delayed{background:var(--red-bg);color:var(--red);}
+  .tag.upcoming{background:#eef1f5;color:var(--muted);}
+  .tag.OnTime{background:var(--green-bg);color:var(--green);}
+  .tag.Early{background:var(--blue-soft);color:var(--blue);}
+  .tag.Delayed{background:var(--red-bg);color:var(--red);}
+  .notes{background:#f7fafd;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;padding:12px 14px;margin-top:14px;}
+  .notes h5{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--blue);margin-bottom:7px;font-weight:650;}
+  .notes ul{margin:0;padding-left:18px;}
+  .notes li{font-size:12.5px;color:var(--ink);margin-bottom:5px;}
+  .det-chart{height:240px;position:relative;margin-top:10px;}
+  .subhead{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:650;margin-bottom:8px;}
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .legend-inline{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
+  .legend-inline span{display:inline-flex;align-items:center;gap:6px;}
+  .legend-inline i{width:14px;height:3px;border-radius:3px;display:inline-block;}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="brand">
+      <div class="logo">C</div>
+      <div>
+        <h1>Core Portfolio Dashboard</h1>
+        <p>Burj Al-Masiyah (BMH) &middot; Rugban (RBD) &middot; La Strada Compound (LSC)</p>
+      </div>
+    </div>
+    <div class="period">
+      <div class="badge">Reporting Period — May 2026</div>
+      <small>All figures in Saudi Riyal (SAR)</small>
+    </div>
+  </div>
+</header>
+
+<div class="filterbar">
+  <div class="filter-inner">
+    <span class="filter-label">View</span>
+    <button class="chip active" data-key="consolidated"><span class="dot"></span>Consolidated</button>
+    <span class="filter-sep"></span>
+    <button class="chip" data-key="BMH"><span class="dot"></span>Burj Al-Masiyah</button>
+    <button class="chip" data-key="RBD"><span class="dot"></span>Rugban</button>
+    <button class="chip" data-key="LSC"><span class="dot"></span>La Strada</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="scope">
+    <div>
+      <h2 id="scopeTitle">Portfolio (Consolidated)</h2>
+      <div class="sub" id="scopeSub">Combined performance across all three projects</div>
+    </div>
+    <div class="sector-tag" id="scopeSector"></div>
+  </div>
+
+  <div class="kpis" id="kpiRow"></div>
+
+  <div class="grid-main">
+    <div class="panel">
+      <div class="phead">
+        <h3>Cash Flow — Planned vs Actual</h3>
+        <div class="seg" id="cfSeg">
+          <button data-mode="scurve" class="on">Lifecycle S-Curve</button>
+          <button data-mode="monthly">2026 Monthly</button>
+        </div>
+      </div>
+      <div class="pbody">
+        <div class="chart-box"><canvas id="cashChart"></canvas></div>
+        <div class="legend-inline" style="margin-top:12px;">
+          <span><i style="background:#9aa9bd;"></i> Planned (cumulative)</span>
+          <span><i style="background:var(--blue);"></i> Actual (cumulative)</span>
+          <span id="barLegend" style="display:none;"><i style="height:10px;width:10px;border-radius:2px;background:#cfdcec;"></i> Monthly bars</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><h3>Earned Value Management</h3></div>
+      <div class="pbody">
+        <table class="evm-table" id="evmTable"></table>
+        <div class="gauges" id="gauges"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmpWrap">
+    <div class="section-title">Project Comparison</div>
+    <div class="panel"><div class="pbody" style="padding:6px 8px;">
+      <table class="cmp">
+        <thead><tr>
+          <th>Project</th><th class="num">Contract Value</th><th>Progress (Actual vs Planned)</th>
+          <th class="num">CPI</th><th class="num">SPI</th><th>Schedule Status</th>
+        </tr></thead>
+        <tbody id="cmpBody"></tbody>
+      </table>
+    </div></div>
+  </div>
+
+  <div class="section-title" id="detailTitle">Project Detail <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted);font-size:12px;">— click any project to expand</span></div>
+  <div id="accWrap"></div>
+
+  <footer>
+    <div>Core Portfolio Dashboard &middot; Generated May 2026 &middot; Source: project &amp; consolidated EVM workbooks.</div>
+    <div>CPI = Cost Performance Index &middot; SPI = Schedule Performance Index &middot; BAC = Budget at Completion</div>
+  </footer>
+</div>
+
+<script>
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const CUR="SAR";
+
+const PROJECTS={
+  BMH:{name:"Burj Al-Masiyah",code:"BMH",sector:"Hospitality",accent:"#c0883b",
+    evm:{bac:160258814.72,pctComplete:.2723,pctPlanned:.3468,ac:43645175.33,ev:43645175.33,pv:55569767.56,cv:0,sv:-11924592.23,cpi:1.00,spi:.79,eac:160258814.72,tcpi:1.00},
+    phases:{design:{amount:1813455,start:"1 Jan 2018",end:"30 Dec 2025",duration:"96 months"},
+            supervision:{amount:7949661,start:"1 Jun 2025",end:"6 Dec 2027",duration:"—"},
+            construction:{amount:150495699,start:"1 Jun 2025",end:"6 Dec 2027",duration:"24 months"}},
+    years:[2018,2019,2020,2021,2022,2023,2024,2025,2026,2027],
+    plannedCum:[328400,1177198,1424386,1626574,1741574,2365186,5110418,39907173,111192147,160258815],
+    actualCum:[119600,1037998,1354786,1626574,1741574,2210186,4999150,33194289,43645175,43645175],
+    mPlanned:[3132519,3132519,3132519,3132519,3132519,3132519,8748310,8748310,8748310,8748310,8748310,8748310],
+    mCumPlanned:[43039692,46172211,49304730,52437249,55569768,58702286,67450597,76198907,84947217,93695527,102443837,111192147],
+    mActual:[2090177,2090177,2090177,2090177,2090177,0,0,0,0,0,0,0],
+    mCumActual:[35284466,37374643,39464821,41554998,43645175,43645175,43645175,43645175,43645175,43645175,43645175,43645175],
+    structure:"Single hospitality tower — phased construction (Phase 1 complete, Phase 2 in progress)",
+    milestones:[
+      {n:"Design Start",p:"1 Jan 2018",a:"1 Jan 2018",prog:null,st:"done"},
+      {n:"Design End",p:"27 Mar 2025",a:"27 Mar 2025",prog:100,st:"done"},
+      {n:"Construction Start (Phase 1)",p:"1 Jun 2025",a:"1 Jun 2025",prog:100,st:"done"},
+      {n:"Construction End (Phase 1)",p:"8 Sep 2025",a:"8 Sep 2025",prog:100,st:"done"},
+      {n:"Construction Start (Phase 2)",p:"8 Oct 2025",a:"8 Oct 2025",prog:100,st:"done"},
+      {n:"Updating IFC & Permit",p:"30 Dec 2025",a:"—",prog:85,st:"progress"},
+      {n:"Sub-Structure End",p:"15 Dec 2025",a:"Delayed",prog:null,st:"delayed"},
+      {n:"Super-structure",p:"18 Jul 2027",a:"—",prog:null,st:"upcoming"},
+      {n:"Operator Facility",p:"1 Jun 2027",a:"—",prog:null,st:"upcoming"},
+      {n:"Construction End (Phase 2)",p:"1 Dec 2027",a:"—",prog:null,st:"upcoming"},
+      {n:"Opening Expected",p:"30 Dec 2027",a:"—",prog:null,st:"upcoming"}],
+    notes:["The interior design is currently under progress; mock-up work will commence upon completion and approval of the interior design.",
+           "All plans were submitted by Moataz Makki.",
+           "A license renewal application was submitted to the municipality, in addition to the Royal Commission's approval of the façades."]},
+
+  RBD:{name:"Rugban",code:"RBD",sector:"Retail / Office / Commercial / Residential",accent:"#2f6db5",
+    evm:{bac:428657918.00,pctComplete:.0394,pctPlanned:.0446,ac:16889448.98,ev:16889448.98,pv:19100550.58,cv:0,sv:-2211101.60,cpi:1.00,spi:.88,eac:428657918.00,tcpi:1.00},
+    phases:{design:{amount:11322544,start:"3 Oct 2023",end:"31 Jan 2025",duration:"28 months"},
+            supervision:{amount:16568650,start:"1 Oct 2025",end:"31 Jan 2029",duration:"—"},
+            construction:{amount:400766724,start:"1 Oct 2025",end:"31 Jan 2029",duration:"40 months"}},
+    years:[2023,2024,2025,2026,2027,2028,2029],
+    plannedCum:[6049448,6519948,17520741,151307145,283586573,415176001,428657918],
+    actualCum:[0,2770244,9445625,16889449,16889449,16889449,16889449],
+    mPlanned:[315962,315962,315962,315962,315962,18886656,18886656,18886656,18886656,18886656,18886656,18886656],
+    mCumPlanned:[17836703,18152665,18468627,18784589,19100551,37987207,56873863,75760520,94647176,113533832,132420489,151307145],
+    mActual:[1488765,1488765,1488765,1488765,1488765,0,0,0,0,0,0,0],
+    mCumActual:[10934390,12423155,13911919,15400684,16889449,16889449,16889449,16889449,16889449,16889449,16889449,16889449],
+    structure:"Phase 1 (Zones A·B·E) · Phase 2 (Zones C·D) · Phase 3 (Zones F·G·H)",
+    activities:[
+      {n:"PH.01 Early Design",p:"7 Aug 2025",a:"7 Aug 2025",st:"OnTime",label:"On Time"},
+      {n:"PH.02 Early Design",p:"2 Oct 2025",a:"1 Oct 2025",st:"OnTime",label:"On Time"},
+      {n:"PH.01 Tender PKG",p:"7 Oct 2025",a:"4 Dec 2025",st:"Delayed",label:"Delayed"},
+      {n:"PH.03 Early Design",p:"21 Nov 2025",a:"30 Nov 2025",st:"Delayed",label:"Delayed"},
+      {n:"PH.02 Tender PKG",p:"2 Dec 2025",a:"4 Dec 2025",st:"OnTime",label:"On Time"},
+      {n:"PH.01 Bidding / Financing",p:"7 Dec 2025",a:"30 Dec 2025",st:"Delayed",label:"Delayed"},
+      {n:"PH.01 Construction",p:"8 Dec 2025",a:"31 Dec 2025",st:"Delayed",label:"Delayed"},
+      {n:"PH.04 Early Design",p:"15 Dec 2025",a:"30 Nov 2025",st:"Early",label:"Early"}],
+    notes:["Early excavation works started at site to mitigate the delay on tendering and bidding milestones."]},
+
+  LSC:{name:"La Strada Compound",code:"LSC",sector:"Residential",accent:"#2a9d8f",
+    evm:{bac:4476337.22,pctComplete:.5029,pctPlanned:.6032,ac:2251337.22,ev:2251337.22,pv:2700000.00,cv:0,sv:-448662.78,cpi:1.00,spi:.83,eac:4476337.22,tcpi:1.00},
+    phases:{design:{amount:4350000,start:"29 May 2024",end:"15 Apr 2026",duration:"25 months"},
+            supervision:{amount:0,start:"1 Feb 2026",end:"31 Mar 2028",duration:"—"},
+            construction:{amount:126338,start:"1 Feb 2026",end:"31 Mar 2028",duration:"26 months"}},
+    years:[2024,2025,2026,2027,2028],
+    plannedCum:[2700000,4476337,4476337,4476337,4476337],
+    actualCum:[675000,1813837,2251337,2251337,2251337],
+    mPlanned:[0,0,0,0,0,0,0,0,0,0,0,0],
+    mCumPlanned:[4476337,4476337,4476337,4476337,4476337,4476337,4476337,4476337,4476337,4476337,4476337,4476337],
+    mActual:[87500,87500,87500,87500,87500,0,0,0,0,0,0,0],
+    mCumActual:[1901337,1988837,2076337,2163837,2251337,2251337,2251337,2251337,2251337,2251337,2251337,2251337],
+    structure:"Phase 1 – 6 (Residential compound)",
+    notes:["Design phase nearing completion (contractual end 15 Apr 2026); supervision mobilisation scheduled from Feb 2026."]}
+};
+
+const CONSOLIDATED={
+  name:"Portfolio (Consolidated)",
+  evm:{bac:593393069.94,pctComplete:.1058,pctPlanned:.1334,ac:62785961.53,ev:62785961.53,pv:79146655.36,cv:0,sv:-16360693.83,cpi:1.00,spi:.79,eac:593393069.94,tcpi:1.00},
+  years:[2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029],
+  plannedCum:[328400,1177198,1424386,1626574,1741574,8414634,14330366,61904251,266975629,448321725,579911153,593393070],
+  actualCum:[119600,1037998,1354786,1626574,1741574,2210186,8444394,44453751,62785962,62785962,62785962,62785962],
+  mPlanned:[3448481,3448481,3448481,3448481,3448481,22019175,27634966,27634966,27634966,27634966,27634966,27634966],
+  mCumPlanned:[65352732,68801213,72249694,75698175,79146655,101165831,128800797,156435764,184070730,211705696,239340663,266975629],
+  mActual:[3666442,3666442,3666442,3666442,3666442,0,0,0,0,0,0,0],
+  mCumActual:[48120193,51786635,55453077,59119519,62785962,62785962,62785962,62785962,62785962,62785962,62785962,62785962]
+};
+
+/* ---------- helpers ---------- */
+const ORDER=["BMH","RBD","LSC"];
+let selection=["consolidated"];   // either ["consolidated"] or subset of ORDER
+let cfMode="scurve";
+let mainChart=null;
+const detailCharts={};
+
+function fmt(n){ if(n===0) return "0"; const a=Math.abs(n); const s=n<0?"-":"";
+  if(a>=1e9) return s+(a/1e9).toFixed(2)+"B";
+  if(a>=1e6) return s+(a/1e6).toFixed(2)+"M";
+  if(a>=1e3) return s+(a/1e3).toFixed(0)+"K";
+  return s+Math.round(a).toLocaleString();}
+function full(n){return Math.round(n).toLocaleString();}
+function pct(x){return (x*100).toFixed(1)+"%";}
+function statusFromSPI(spi){ if(spi>=0.95) return {cls:"st-green",txt:"On Track"};
+  if(spi>=0.85) return {cls:"st-amber",txt:"Minor Delay"}; return {cls:"st-red",txt:"Behind Schedule"};}
+
+/* Build the dataset for the current selection */
+function activeProjects(){
+  if(selection[0]==="consolidated") return ORDER.slice();
+  return ORDER.filter(k=>selection.includes(k));
+}
+function buildView(){
+  if(selection[0]==="consolidated"){
+    return {title:CONSOLIDATED.name,sub:"Combined performance across all three projects",sector:"3 active projects — Hospitality · Mixed-use · Residential",
+            evm:CONSOLIDATED.evm,years:CONSOLIDATED.years,plannedCum:CONSOLIDATED.plannedCum,actualCum:CONSOLIDATED.actualCum,
+            mPlanned:CONSOLIDATED.mPlanned,mActual:CONSOLIDATED.mActual,mCumPlanned:CONSOLIDATED.mCumPlanned,mCumActual:CONSOLIDATED.mCumActual,
+            isConsolidated:true};
+  }
+  const keys=activeProjects();
+  if(keys.length===1){
+    const p=PROJECTS[keys[0]];
+    return {title:p.name+" ("+p.code+")",sub:p.sector,sector:p.sector,evm:p.evm,years:p.years,
+            plannedCum:p.plannedCum,actualCum:p.actualCum,mPlanned:p.mPlanned,mActual:p.mActual,
+            mCumPlanned:p.mCumPlanned,mCumActual:p.mCumActual,isConsolidated:false};
+  }
+  // aggregate selected projects
+  const e={bac:0,ac:0,ev:0,pv:0};
+  keys.forEach(k=>{const v=PROJECTS[k].evm;e.bac+=v.bac;e.ac+=v.ac;e.ev+=v.ev;e.pv+=v.pv;});
+  const evm={bac:e.bac,ac:e.ac,ev:e.ev,pv:e.pv,pctComplete:e.ev/e.bac,pctPlanned:e.pv/e.bac,
+             cv:e.ev-e.ac,sv:e.ev-e.pv,cpi:e.ac?e.ev/e.ac:1,spi:e.pv?e.ev/e.pv:1,
+             eac:e.bac/(e.ac?e.ev/e.ac:1),tcpi:(e.bac-e.ev)/(e.bac-e.ac)};
+  // unified year axis with carry-forward cumulative
+  let yMin=Math.min(...keys.map(k=>PROJECTS[k].years[0]));
+  let yMax=Math.max(...keys.map(k=>PROJECTS[k].years.slice(-1)[0]));
+  const years=[]; for(let y=yMin;y<=yMax;y++) years.push(y);
+  const plannedCum=years.map(()=>0), actualCum=years.map(()=>0);
+  keys.forEach(k=>{const p=PROJECTS[k]; years.forEach((y,i)=>{
+    let idx=p.years.indexOf(y); let pv,av;
+    if(idx>=0){pv=p.plannedCum[idx];av=p.actualCum[idx];}
+    else if(y<p.years[0]){pv=0;av=0;}
+    else {pv=p.plannedCum[p.plannedCum.length-1];av=p.actualCum[p.actualCum.length-1];}
+    plannedCum[i]+=pv; actualCum[i]+=av;});});
+  const sum12=(arrs)=>{const o=Array(12).fill(0);arrs.forEach(a=>a.forEach((v,i)=>o[i]+=v));return o;};
+  const mPlanned=sum12(keys.map(k=>PROJECTS[k].mPlanned));
+  const mActual=sum12(keys.map(k=>PROJECTS[k].mActual));
+  const mCumPlanned=sum12(keys.map(k=>PROJECTS[k].mCumPlanned));
+  const mCumActual=sum12(keys.map(k=>PROJECTS[k].mCumActual));
+  return {title:keys.map(k=>PROJECTS[k].code).join(" + ")+" — Selected Group",
+          sub:keys.map(k=>PROJECTS[k].name).join(", "),sector:keys.length+" projects selected",
+          evm,years,plannedCum,actualCum,mPlanned,mActual,mCumPlanned,mCumActual,isConsolidated:false};
+}
+
+/* ---------- renderers ---------- */
+function renderKPIs(v){
+  const e=v.evm, st=statusFromSPI(e.spi);
+  const progPct=Math.min(100,e.pctComplete*100), planPct=Math.min(100,e.pctPlanned*100);
+  const svGood=e.sv>=0;
+  const html=`
+  <div class="kpi k-budget">
+    <div class="label">Portfolio Value (BAC)</div>
+    <div class="val"><span class="cur">${CUR}</span>${fmt(e.bac)}</div>
+    <div class="meta">Estimate at Completion: ${CUR} ${fmt(e.eac)}</div>
+  </div>
+  <div class="kpi k-prog">
+    <div class="label">Overall Progress</div>
+    <div class="val">${pct(e.pctComplete)}</div>
+    <div class="meta">Planned ${pct(e.pctPlanned)} <span class="pill ${e.pctComplete>=e.pctPlanned?'up':'down'}">${e.pctComplete>=e.pctPlanned?'+':''}${((e.pctComplete-e.pctPlanned)*100).toFixed(1)} pts</span></div>
+    <div class="mini-bar"><i style="width:${progPct}%"></i><span class="plan-mark" style="left:${planPct}%"></span></div>
+  </div>
+  <div class="kpi k-ev">
+    <div class="label">Earned Value</div>
+    <div class="val"><span class="cur">${CUR}</span>${fmt(e.ev)}</div>
+    <div class="meta">Actual Cost: ${CUR} ${fmt(e.ac)} <span class="pill flat">CV ${e.cv===0?'0':fmt(e.cv)}</span></div>
+  </div>
+  <div class="kpi k-sv">
+    <div class="label">Schedule Variance</div>
+    <div class="val ${svGood?'pos':'neg'}">${svGood?'+':'−'}${CUR} ${fmt(Math.abs(e.sv))}</div>
+    <div class="meta">Behind planned value <span class="pill ${svGood?'up':'down'}">SPI ${e.spi.toFixed(2)}</span></div>
+  </div>
+  <div class="kpi k-cpi">
+    <div class="label">Schedule Status</div>
+    <div class="val" style="font-size:19px;margin-top:9px;"><span class="status-badge ${st.cls}">${st.txt}</span></div>
+    <div class="meta">CPI ${e.cpi.toFixed(2)} (on budget) · TCPI ${e.tcpi.toFixed(2)}</div>
+  </div>`;
+  document.getElementById("kpiRow").innerHTML=html;
+}
+
+function renderEVM(v){
+  const e=v.evm;
+  const rows=[
+    ["Budget at Completion (BAC)",CUR+" "+full(e.bac),""],
+    ["Actual Cost (AC)",CUR+" "+full(e.ac),""],
+    ["Earned Value (EV)",CUR+" "+full(e.ev),""],
+    ["Planned Value (PV)",CUR+" "+full(e.pv),""],
+    ["Cost Variance (CV)",(e.cv>=0?"":"−")+CUR+" "+full(Math.abs(e.cv)),e.cv>=0?"pos":"neg"],
+    ["Schedule Variance (SV)",(e.sv>=0?"":"−")+CUR+" "+full(Math.abs(e.sv)),e.sv>=0?"pos":"neg"],
+    ["Cost Performance Index (CPI)",e.cpi.toFixed(2),e.cpi>=1?"pos":"neg"],
+    ["Schedule Performance Index (SPI)",e.spi.toFixed(2),e.spi>=1?"pos":"neg"],
+    ["Estimate at Completion (EAC)",CUR+" "+full(e.eac),""],
+    ["To-Complete Perf. Index (TCPI)",e.tcpi.toFixed(2),""]
+  ];
+  document.getElementById("evmTable").innerHTML=rows.map(r=>
+    `<tr><td>${r[0]}</td><td class="${r[2]}">${r[1]}</td></tr>`).join("");
+  renderGauges(e);
+}
+
+function gaugeSVG(value,goodAt){
+  // semicircle gauge 0..1.4 scale
+  const max=1.4, v=Math.max(0,Math.min(max,value));
+  const ang=180*(v/max); // degrees from left
+  const cx=85,cy=85,r=66;
+  function pt(a){const rad=(180-a)*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
+  function arc(a0,a1,color,w){const[x0,y0]=pt(a0),[x1,y1]=pt(a1);const large=(a1-a0)>180?1:0;
+    return `<path d="M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;}
+  // zones: red 0-0.85 (=> deg 0-109.3), amber 0.85-0.95, green 0.95-1.4
+  const d=x=>180*(x/max);
+  const seg=arc(0,d(0.85),"#cc3f55",13)+arc(d(0.85),d(0.95),"#d99409",13)+arc(d(0.95),180,"#1e9e6a",13);
+  const[nx,ny]=pt(ang);
+  const col=value>=0.95?"#1e9e6a":(value>=0.85?"#d99409":"#cc3f55");
+  return `<svg viewBox="0 0 170 104">${seg}
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#13314f" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="5.5" fill="#13314f"/>
+    <text x="14" y="100" font-size="9" fill="#94a3b8">0</text>
+    <text x="150" y="100" font-size="9" fill="#94a3b8">1.4</text>
+    <text x="${cx}" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="${col}">${value.toFixed(2)}</text>
+  </svg>`;
+}
+function renderGauges(e){
+  document.getElementById("gauges").innerHTML=
+    `<div class="gauge">${gaugeSVG(e.cpi)}<div class="gname">CPI — Cost</div></div>
+     <div class="gauge">${gaugeSVG(e.spi)}<div class="gname">SPI — Schedule</div></div>`;
+}
+
+/* main cash flow chart */
+function renderChart(v){
+  const ctx=document.getElementById("cashChart");
+  if(mainChart) mainChart.destroy();
+  document.getElementById("barLegend").style.display = cfMode==="monthly"?"inline-flex":"none";
+  let labels,datasets;
+  if(cfMode==="scurve"){
+    labels=v.years.map(String);
+    datasets=[
+      {type:"line",label:"Planned (cumulative)",data:v.plannedCum,borderColor:"#9aa9bd",backgroundColor:"rgba(154,169,189,.10)",
+       borderWidth:2.4,borderDash:[6,4],tension:.35,pointRadius:2.5,pointBackgroundColor:"#9aa9bd",fill:true},
+      {type:"line",label:"Actual (cumulative)",data:v.actualCum,borderColor:"#2f6db5",backgroundColor:"rgba(47,109,181,.14)",
+       borderWidth:3,tension:.35,pointRadius:2.8,pointBackgroundColor:"#2f6db5",fill:true}
+    ];
+  }else{
+    labels=MONTHS;
+    datasets=[
+      {type:"bar",label:"Planned (monthly)",data:v.mPlanned,backgroundColor:"#cfdcec",borderRadius:3,order:3,yAxisID:"y1"},
+      {type:"bar",label:"Actual (monthly)",data:v.mActual,backgroundColor:"#2f6db5",borderRadius:3,order:2,yAxisID:"y1"},
+      {type:"line",label:"Planned (cumulative)",data:v.mCumPlanned,borderColor:"#9aa9bd",borderWidth:2.2,borderDash:[6,4],tension:.3,pointRadius:0,order:1,yAxisID:"y"},
+      {type:"line",label:"Actual (cumulative)",data:v.mCumActual,borderColor:"#13314f",borderWidth:2.6,tension:.3,pointRadius:0,order:0,yAxisID:"y"}
+    ];
+  }
+  const scales = cfMode==="scurve" ? {
+      y:{ticks:{callback:v=>CUR+" "+fmt(v),font:{size:11}},grid:{color:"#eef2f6"}},
+      x:{grid:{display:false}}
+    } : {
+      y:{position:"left",ticks:{callback:v=>fmt(v),font:{size:11}},grid:{color:"#eef2f6"},title:{display:true,text:"Cumulative",font:{size:10}}},
+      y1:{position:"right",ticks:{callback:v=>fmt(v),font:{size:11}},grid:{display:false},title:{display:true,text:"Monthly",font:{size:10}}},
+      x:{grid:{display:false}}
+    };
+  mainChart=new Chart(ctx,{data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.y)}}},
+      scales}});
+}
+
+/* comparison table */
+function renderComparison(){
+  const show = (selection[0]==="consolidated") || activeProjects().length>1;
+  document.getElementById("cmpWrap").style.display = show?"block":"none";
+  if(!show) return;
+  const keys=activeProjects();
+  document.getElementById("cmpBody").innerHTML=keys.map(k=>{
+    const p=PROJECTS[k],e=p.evm,st=statusFromSPI(e.spi);
+    const cp=Math.min(100,e.pctComplete*100),pp=Math.min(100,e.pctPlanned*100);
+    return `<tr>
+      <td><div class="pname"><span class="swatch" style="background:${p.accent}"></span>${p.name}<span style="color:var(--muted);font-weight:500;">(${p.code})</span></div>
+          <div style="font-size:11.5px;color:var(--muted);margin-left:20px;">${p.sector}</div></td>
+      <td class="num">${CUR} ${fmt(e.bac)}</td>
+      <td><div class="barcell"><div class="track"><div class="fill" style="width:${cp}%;background:${p.accent}"></div></div>
+          <span style="font-variant-numeric:tabular-nums;font-weight:600;">${pct(e.pctComplete)}</span>
+          <span style="color:var(--muted);font-size:11.5px;">/ ${pct(e.pctPlanned)}</span></div></td>
+      <td class="num"><b>${e.cpi.toFixed(2)}</b></td>
+      <td class="num"><b>${e.spi.toFixed(2)}</b></td>
+      <td><span class="status-badge ${st.cls}">${st.txt}</span></td>
+    </tr>`;}).join("");
+}
+
+/* accordion detail */
+function renderAccordions(){
+  const keys=activeProjects();
+  const wrap=document.getElementById("accWrap");
+  Object.keys(detailCharts).forEach(k=>{if(detailCharts[k]){detailCharts[k].destroy();delete detailCharts[k];}});
+  wrap.innerHTML=keys.map(k=>{
+    const p=PROJECTS[k],e=p.evm,st=statusFromSPI(e.spi);
+    const ph=p.phases;
+    const phaseRow=(t,o,extra)=>`<div class="phase-row"><div class="pl"><b>${t}</b><small>${o.start} → ${o.end} · ${o.duration}</small></div><div class="pr">${CUR} ${fmt(o.amount)}</div></div>`;
+    let milestonesHTML="";
+    if(p.milestones){
+      milestonesHTML=`<div class="subhead">Project Milestones</div>
+       <table class="mtable"><thead><tr><th>Milestone</th><th>Planned</th><th>Actual</th><th>Status / Progress</th></tr></thead><tbody>${
+        p.milestones.map(m=>`<tr><td>${m.n}</td><td>${m.p}</td><td>${m.a}</td>
+          <td>${m.prog!==null?`<span class="mini-prog"><i style="width:${m.prog}%"></i></span>${m.prog}%`:`<span class="tag ${m.st}">${m.st.charAt(0).toUpperCase()+m.st.slice(1)}</span>`}</td></tr>`).join("")
+       }</tbody></table>`;
+    }
+    let actHTML="";
+    if(p.activities){
+      actHTML=`<div class="subhead">Current Activities</div>
+       <table class="mtable"><thead><tr><th>Activity</th><th>Planned</th><th>Actual</th><th>Status</th></tr></thead><tbody>${
+        p.activities.map(m=>`<tr><td>${m.n}</td><td>${m.p}</td><td>${m.a}</td><td><span class="tag ${m.st}">${m.label}</span></td></tr>`).join("")
+       }</tbody></table>`;
+    }
+    const notesHTML=p.notes?`<div class="notes"><h5>Notes &amp; Remarks</h5><ul>${p.notes.map(n=>`<li>${n}</li>`).join("")}</ul></div>`:"";
+    return `<div class="acc" data-proj="${k}">
+      <div class="acc-head" onclick="toggleAcc('${k}')">
+        <div class="accent" style="background:${p.accent}"></div>
+        <div class="ah-title"><b>${p.name} <span style="font-weight:500;color:var(--muted)">(${p.code})</span></b><span>${p.sector}</span></div>
+        <div class="ah-stats">
+          <div class="ah-stat"><label>Value</label><b>${CUR} ${fmt(e.bac)}</b></div>
+          <div class="ah-stat"><label>Complete</label><b>${pct(e.pctComplete)}</b></div>
+          <div class="ah-stat"><label>CPI</label><b>${e.cpi.toFixed(2)}</b></div>
+          <div class="ah-stat"><label>SPI</label><b>${e.spi.toFixed(2)}</b></div>
+          <span class="status-badge ${st.cls}">${st.txt}</span>
+          <span class="chev">▾</span>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div style="font-size:12.5px;color:var(--muted);margin-top:14px;">${p.structure}</div>
+        <div class="detail-grid">
+          <div>
+            <div class="subhead">Contract Breakdown by Phase</div>
+            ${phaseRow("Design Phase",ph.design)}
+            ${phaseRow("Supervision Phase",ph.supervision)}
+            ${phaseRow("Construction Phase",ph.construction)}
+            <div class="phase-row" style="border-top:2px solid var(--line);margin-top:4px;"><div class="pl"><b>Total Project Value</b></div><div class="pr" style="color:${p.accent}">${CUR} ${fmt(e.bac)}</div></div>
+            <div class="subhead" style="margin-top:18px;">Cash Flow — Lifecycle (cumulative)</div>
+            <div class="det-chart"><canvas id="det_${k}"></canvas></div>
+          </div>
+          <div>
+            ${milestonesHTML}${actHTML}${notesHTML}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function buildDetailChart(k){
+  if(detailCharts[k]) return;
+  const p=PROJECTS[k];const el=document.getElementById("det_"+k);if(!el)return;
+  detailCharts[k]=new Chart(el,{data:{labels:p.years.map(String),datasets:[
+    {type:"line",label:"Planned",data:p.plannedCum,borderColor:"#9aa9bd",borderDash:[6,4],borderWidth:2,tension:.35,pointRadius:2,fill:false},
+    {type:"line",label:"Actual",data:p.actualCum,borderColor:p.accent,backgroundColor:p.accent+"22",borderWidth:2.6,tension:.35,pointRadius:2.4,fill:true}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{display:true,labels:{boxWidth:12,font:{size:11}}},
+      tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.y)}}},
+    scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}},grid:{color:"#eef2f6"}},x:{grid:{display:false}}}}});
+}
+function toggleAcc(k){
+  const el=document.querySelector('.acc[data-proj="'+k+'"]');
+  el.classList.toggle("open");
+  if(el.classList.contains("open")) setTimeout(()=>buildDetailChart(k),30);
+}
+
+/* ---------- orchestration ---------- */
+function render(){
+  const v=buildView();
+  document.getElementById("scopeTitle").textContent=v.title;
+  document.getElementById("scopeSub").textContent=v.sub;
+  document.getElementById("scopeSector").textContent=v.sector;
+  renderKPIs(v);
+  renderEVM(v);
+  renderChart(v);
+  renderComparison();
+  renderAccordions();
+  // detail title visibility
+  document.getElementById("detailTitle").style.display = activeProjects().length?"flex":"none";
+}
+
+/* chip behaviour */
+document.querySelectorAll(".chip").forEach(ch=>{
+  ch.addEventListener("click",()=>{
+    const key=ch.dataset.key;
+    if(key==="consolidated"){ selection=["consolidated"]; }
+    else{
+      if(selection[0]==="consolidated") selection=[];
+      if(selection.includes(key)) selection=selection.filter(x=>x!==key);
+      else selection.push(key);
+      if(selection.length===0) selection=["consolidated"]; // never empty
+    }
+    syncChips(); render();
+  });
+});
+function syncChips(){
+  document.querySelectorAll(".chip").forEach(ch=>{
+    const key=ch.dataset.key;
+    const on = (key==="consolidated") ? selection[0]==="consolidated"
+               : (selection[0]!=="consolidated" && selection.includes(key));
+    ch.classList.toggle("active",on);
+  });
+}
+document.querySelectorAll("#cfSeg button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("#cfSeg button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); cfMode=b.dataset.mode; renderChart(buildView());
+  });
+});
+
+syncChips();
+render();
+</script>
+</body>
+</html>
