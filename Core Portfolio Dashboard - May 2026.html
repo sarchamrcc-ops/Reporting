@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Core Portfolio Dashboard — May 2026</title>
+<title>RCC-PMO · Core Portfolio Dashboard — May 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
@@ -21,19 +21,21 @@
   /* Header */
   header{background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 70%,#23598f 100%);color:#fff;
     position:sticky;top:0;z-index:50;box-shadow:0 2px 14px rgba(8,24,44,.28);}
-  .head-inner{max-width:1320px;margin:0 auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-  .brand{display:flex;align-items:center;gap:14px;}
-  .logo{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;
-    border:1px solid rgba(255,255,255,.25);font-weight:700;font-size:18px;letter-spacing:.5px;}
+  .head-inner{max-width:1320px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:15px;}
+  .logo{width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));}
+  .brandname{font-size:13px;font-weight:700;letter-spacing:3px;color:#e9c98e;text-transform:uppercase;margin-bottom:1px;}
   .brand h1{font-size:20px;font-weight:650;letter-spacing:.2px;}
   .brand p{font-size:12.5px;color:#bcd4ee;margin-top:2px;}
   .period{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
   .period .badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:6px 14px;border-radius:30px;
     font-weight:600;font-size:13px;letter-spacing:.4px;}
   .period small{font-size:11px;color:#a9c5e3;}
+  .period .tagline{font-size:10.5px;color:#d8a85f;letter-spacing:.5px;font-weight:600;}
 
   /* Filter bar */
-  .filterbar{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:75px;z-index:40;box-shadow:0 2px 8px rgba(16,40,70,.05);}
+  .filterbar{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:80px;z-index:40;box-shadow:0 2px 8px rgba(16,40,70,.05);}
   .filter-inner{max-width:1320px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .filter-label{font-size:11.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);font-weight:600;margin-right:4px;}
   .chip{border:1.4px solid var(--line);background:#fff;color:var(--ink);padding:8px 15px;border-radius:30px;font-size:13.5px;font-weight:550;
@@ -104,7 +106,6 @@
   .gauge{text-align:center;padding:6px 4px;}
   .gauge svg{width:100%;max-width:170px;height:auto;}
   .gauge .gname{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.4px;margin-top:2px;}
-  .gauge .gnum{font-size:22px;font-weight:700;}
 
   /* Comparison table */
   .cmp{width:100%;border-collapse:collapse;font-size:13.5px;}
@@ -168,6 +169,7 @@
   .det-chart{height:240px;position:relative;margin-top:10px;}
   .subhead{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:650;margin-bottom:8px;}
   footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  footer .fbrand{font-weight:650;color:var(--navy);letter-spacing:.5px;}
   .legend-inline{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
   .legend-inline span{display:inline-flex;align-items:center;gap:6px;}
   .legend-inline i{width:14px;height:3px;border-radius:3px;display:inline-block;}
@@ -177,8 +179,36 @@
 <header>
   <div class="head-inner">
     <div class="brand">
-      <div class="logo">C</div>
+      <div class="logo">
+        <svg viewBox="0 0 120 120" width="52" height="52" role="img" aria-label="RCC-PMO logo">
+          <defs>
+            <linearGradient id="silverA" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f1f4f7"/><stop offset=".42" stop-color="#b6bdc6"/>
+              <stop offset=".6" stop-color="#e2e7ec"/><stop offset="1" stop-color="#959da7"/>
+            </linearGradient>
+            <linearGradient id="silverB" x1="1" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f1f4f7"/><stop offset=".42" stop-color="#b6bdc6"/>
+              <stop offset=".6" stop-color="#e2e7ec"/><stop offset="1" stop-color="#959da7"/>
+            </linearGradient>
+            <linearGradient id="maroon" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#832c37"/><stop offset=".55" stop-color="#5b1d26"/>
+              <stop offset="1" stop-color="#3f1218"/>
+            </linearGradient>
+            <radialGradient id="ruby" cx=".5" cy=".4" r=".75">
+              <stop offset="0" stop-color="#ff6182"/><stop offset=".45" stop-color="#e51d49"/>
+              <stop offset="1" stop-color="#990d2c"/>
+            </radialGradient>
+          </defs>
+          <polygon points="60,4 88,32 60,60 32,32" fill="url(#maroon)"/>
+          <path d="M42,28 L57,38 M64,18 L75,40 M48,46 L72,42" stroke="#a85763" stroke-width="1" fill="none" opacity=".5"/>
+          <polygon points="32,32 60,60 32,88 4,60" fill="url(#silverA)"/>
+          <polygon points="88,32 116,60 88,88 60,60" fill="url(#silverB)"/>
+          <polygon points="60,60 88,88 60,116 32,88" fill="url(#ruby)"/>
+          <path d="M60,60 L60,116 M32,88 L88,88 M46,74 L74,102 M74,74 L46,102" stroke="#ff9bb0" stroke-width=".8" fill="none" opacity=".5"/>
+        </svg>
+      </div>
       <div>
+        <div class="brandname">RCC-PMO</div>
         <h1>Core Portfolio Dashboard</h1>
         <p>Burj Al-Masiyah (BMH) &middot; Rugban (RBD) &middot; La Strada Compound (LSC)</p>
       </div>
@@ -186,6 +216,7 @@
     <div class="period">
       <div class="badge">Reporting Period — May 2026</div>
       <small>All figures in Saudi Riyal (SAR)</small>
+      <div class="tagline">RCC-PMO — Digital Transformation Initiative</div>
     </div>
   </div>
 </header>
@@ -257,7 +288,7 @@
   <div id="accWrap"></div>
 
   <footer>
-    <div>Core Portfolio Dashboard &middot; Generated May 2026 &middot; Source: project &amp; consolidated EVM workbooks.</div>
+    <div><span class="fbrand">RCC-PMO</span> &middot; Core Portfolio Dashboard &middot; Reporting period May 2026 &middot; Source: project &amp; consolidated EVM workbooks.</div>
     <div>CPI = Cost Performance Index &middot; SPI = Schedule Performance Index &middot; BAC = Budget at Completion</div>
   </footer>
 </div>
@@ -348,9 +379,8 @@ const CONSOLIDATED={
   mCumActual:[48120193,51786635,55453077,59119519,62785962,62785962,62785962,62785962,62785962,62785962,62785962,62785962]
 };
 
-/* ---------- helpers ---------- */
 const ORDER=["BMH","RBD","LSC"];
-let selection=["consolidated"];   // either ["consolidated"] or subset of ORDER
+let selection=["consolidated"];
 let cfMode="scurve";
 let mainChart=null;
 const detailCharts={};
@@ -365,7 +395,6 @@ function pct(x){return (x*100).toFixed(1)+"%";}
 function statusFromSPI(spi){ if(spi>=0.95) return {cls:"st-green",txt:"On Track"};
   if(spi>=0.85) return {cls:"st-amber",txt:"Minor Delay"}; return {cls:"st-red",txt:"Behind Schedule"};}
 
-/* Build the dataset for the current selection */
 function activeProjects(){
   if(selection[0]==="consolidated") return ORDER.slice();
   return ORDER.filter(k=>selection.includes(k));
@@ -384,13 +413,11 @@ function buildView(){
             plannedCum:p.plannedCum,actualCum:p.actualCum,mPlanned:p.mPlanned,mActual:p.mActual,
             mCumPlanned:p.mCumPlanned,mCumActual:p.mCumActual,isConsolidated:false};
   }
-  // aggregate selected projects
   const e={bac:0,ac:0,ev:0,pv:0};
   keys.forEach(k=>{const v=PROJECTS[k].evm;e.bac+=v.bac;e.ac+=v.ac;e.ev+=v.ev;e.pv+=v.pv;});
   const evm={bac:e.bac,ac:e.ac,ev:e.ev,pv:e.pv,pctComplete:e.ev/e.bac,pctPlanned:e.pv/e.bac,
              cv:e.ev-e.ac,sv:e.ev-e.pv,cpi:e.ac?e.ev/e.ac:1,spi:e.pv?e.ev/e.pv:1,
              eac:e.bac/(e.ac?e.ev/e.ac:1),tcpi:(e.bac-e.ev)/(e.bac-e.ac)};
-  // unified year axis with carry-forward cumulative
   let yMin=Math.min(...keys.map(k=>PROJECTS[k].years[0]));
   let yMax=Math.max(...keys.map(k=>PROJECTS[k].years.slice(-1)[0]));
   const years=[]; for(let y=yMin;y<=yMax;y++) years.push(y);
@@ -411,39 +438,27 @@ function buildView(){
           evm,years,plannedCum,actualCum,mPlanned,mActual,mCumPlanned,mCumActual,isConsolidated:false};
 }
 
-/* ---------- renderers ---------- */
 function renderKPIs(v){
   const e=v.evm, st=statusFromSPI(e.spi);
   const progPct=Math.min(100,e.pctComplete*100), planPct=Math.min(100,e.pctPlanned*100);
   const svGood=e.sv>=0;
-  const html=`
-  <div class="kpi k-budget">
-    <div class="label">Portfolio Value (BAC)</div>
+  document.getElementById("kpiRow").innerHTML=`
+  <div class="kpi k-budget"><div class="label">Portfolio Value (BAC)</div>
     <div class="val"><span class="cur">${CUR}</span>${fmt(e.bac)}</div>
-    <div class="meta">Estimate at Completion: ${CUR} ${fmt(e.eac)}</div>
-  </div>
-  <div class="kpi k-prog">
-    <div class="label">Overall Progress</div>
+    <div class="meta">Estimate at Completion: ${CUR} ${fmt(e.eac)}</div></div>
+  <div class="kpi k-prog"><div class="label">Overall Progress</div>
     <div class="val">${pct(e.pctComplete)}</div>
     <div class="meta">Planned ${pct(e.pctPlanned)} <span class="pill ${e.pctComplete>=e.pctPlanned?'up':'down'}">${e.pctComplete>=e.pctPlanned?'+':''}${((e.pctComplete-e.pctPlanned)*100).toFixed(1)} pts</span></div>
-    <div class="mini-bar"><i style="width:${progPct}%"></i><span class="plan-mark" style="left:${planPct}%"></span></div>
-  </div>
-  <div class="kpi k-ev">
-    <div class="label">Earned Value</div>
+    <div class="mini-bar"><i style="width:${progPct}%"></i><span class="plan-mark" style="left:${planPct}%"></span></div></div>
+  <div class="kpi k-ev"><div class="label">Earned Value</div>
     <div class="val"><span class="cur">${CUR}</span>${fmt(e.ev)}</div>
-    <div class="meta">Actual Cost: ${CUR} ${fmt(e.ac)} <span class="pill flat">CV ${e.cv===0?'0':fmt(e.cv)}</span></div>
-  </div>
-  <div class="kpi k-sv">
-    <div class="label">Schedule Variance</div>
+    <div class="meta">Actual Cost: ${CUR} ${fmt(e.ac)} <span class="pill flat">CV ${e.cv===0?'0':fmt(e.cv)}</span></div></div>
+  <div class="kpi k-sv"><div class="label">Schedule Variance</div>
     <div class="val ${svGood?'pos':'neg'}">${svGood?'+':'−'}${CUR} ${fmt(Math.abs(e.sv))}</div>
-    <div class="meta">Behind planned value <span class="pill ${svGood?'up':'down'}">SPI ${e.spi.toFixed(2)}</span></div>
-  </div>
-  <div class="kpi k-cpi">
-    <div class="label">Schedule Status</div>
+    <div class="meta">Behind planned value <span class="pill ${svGood?'up':'down'}">SPI ${e.spi.toFixed(2)}</span></div></div>
+  <div class="kpi k-cpi"><div class="label">Schedule Status</div>
     <div class="val" style="font-size:19px;margin-top:9px;"><span class="status-badge ${st.cls}">${st.txt}</span></div>
-    <div class="meta">CPI ${e.cpi.toFixed(2)} (on budget) · TCPI ${e.tcpi.toFixed(2)}</div>
-  </div>`;
-  document.getElementById("kpiRow").innerHTML=html;
+    <div class="meta">CPI ${e.cpi.toFixed(2)} (on budget) · TCPI ${e.tcpi.toFixed(2)}</div></div>`;
 }
 
 function renderEVM(v){
@@ -458,22 +473,18 @@ function renderEVM(v){
     ["Cost Performance Index (CPI)",e.cpi.toFixed(2),e.cpi>=1?"pos":"neg"],
     ["Schedule Performance Index (SPI)",e.spi.toFixed(2),e.spi>=1?"pos":"neg"],
     ["Estimate at Completion (EAC)",CUR+" "+full(e.eac),""],
-    ["To-Complete Perf. Index (TCPI)",e.tcpi.toFixed(2),""]
-  ];
-  document.getElementById("evmTable").innerHTML=rows.map(r=>
-    `<tr><td>${r[0]}</td><td class="${r[2]}">${r[1]}</td></tr>`).join("");
+    ["To-Complete Perf. Index (TCPI)",e.tcpi.toFixed(2),""]];
+  document.getElementById("evmTable").innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td class="${r[2]}">${r[1]}</td></tr>`).join("");
   renderGauges(e);
 }
 
-function gaugeSVG(value,goodAt){
-  // semicircle gauge 0..1.4 scale
+function gaugeSVG(value){
   const max=1.4, v=Math.max(0,Math.min(max,value));
-  const ang=180*(v/max); // degrees from left
+  const ang=180*(v/max);
   const cx=85,cy=85,r=66;
   function pt(a){const rad=(180-a)*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
   function arc(a0,a1,color,w){const[x0,y0]=pt(a0),[x1,y1]=pt(a1);const large=(a1-a0)>180?1:0;
     return `<path d="M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;}
-  // zones: red 0-0.85 (=> deg 0-109.3), amber 0.85-0.95, green 0.95-1.4
   const d=x=>180*(x/max);
   const seg=arc(0,d(0.85),"#cc3f55",13)+arc(d(0.85),d(0.95),"#d99409",13)+arc(d(0.95),180,"#1e9e6a",13);
   const[nx,ny]=pt(ang);
@@ -483,8 +494,7 @@ function gaugeSVG(value,goodAt){
     <circle cx="${cx}" cy="${cy}" r="5.5" fill="#13314f"/>
     <text x="14" y="100" font-size="9" fill="#94a3b8">0</text>
     <text x="150" y="100" font-size="9" fill="#94a3b8">1.4</text>
-    <text x="${cx}" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="${col}">${value.toFixed(2)}</text>
-  </svg>`;
+    <text x="${cx}" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="${col}">${value.toFixed(2)}</text></svg>`;
 }
 function renderGauges(e){
   document.getElementById("gauges").innerHTML=
@@ -492,45 +502,35 @@ function renderGauges(e){
      <div class="gauge">${gaugeSVG(e.spi)}<div class="gname">SPI — Schedule</div></div>`;
 }
 
-/* main cash flow chart */
 function renderChart(v){
   const ctx=document.getElementById("cashChart");
   if(mainChart) mainChart.destroy();
   document.getElementById("barLegend").style.display = cfMode==="monthly"?"inline-flex":"none";
-  let labels,datasets;
+  let labels,datasets,scales;
   if(cfMode==="scurve"){
     labels=v.years.map(String);
     datasets=[
       {type:"line",label:"Planned (cumulative)",data:v.plannedCum,borderColor:"#9aa9bd",backgroundColor:"rgba(154,169,189,.10)",
        borderWidth:2.4,borderDash:[6,4],tension:.35,pointRadius:2.5,pointBackgroundColor:"#9aa9bd",fill:true},
       {type:"line",label:"Actual (cumulative)",data:v.actualCum,borderColor:"#2f6db5",backgroundColor:"rgba(47,109,181,.14)",
-       borderWidth:3,tension:.35,pointRadius:2.8,pointBackgroundColor:"#2f6db5",fill:true}
-    ];
+       borderWidth:3,tension:.35,pointRadius:2.8,pointBackgroundColor:"#2f6db5",fill:true}];
+    scales={y:{ticks:{callback:x=>CUR+" "+fmt(x),font:{size:11}},grid:{color:"#eef2f6"}},x:{grid:{display:false}}};
   }else{
     labels=MONTHS;
     datasets=[
       {type:"bar",label:"Planned (monthly)",data:v.mPlanned,backgroundColor:"#cfdcec",borderRadius:3,order:3,yAxisID:"y1"},
       {type:"bar",label:"Actual (monthly)",data:v.mActual,backgroundColor:"#2f6db5",borderRadius:3,order:2,yAxisID:"y1"},
       {type:"line",label:"Planned (cumulative)",data:v.mCumPlanned,borderColor:"#9aa9bd",borderWidth:2.2,borderDash:[6,4],tension:.3,pointRadius:0,order:1,yAxisID:"y"},
-      {type:"line",label:"Actual (cumulative)",data:v.mCumActual,borderColor:"#13314f",borderWidth:2.6,tension:.3,pointRadius:0,order:0,yAxisID:"y"}
-    ];
+      {type:"line",label:"Actual (cumulative)",data:v.mCumActual,borderColor:"#13314f",borderWidth:2.6,tension:.3,pointRadius:0,order:0,yAxisID:"y"}];
+    scales={y:{position:"left",ticks:{callback:x=>fmt(x),font:{size:11}},grid:{color:"#eef2f6"},title:{display:true,text:"Cumulative",font:{size:10}}},
+      y1:{position:"right",ticks:{callback:x=>fmt(x),font:{size:11}},grid:{display:false},title:{display:true,text:"Monthly",font:{size:10}}},
+      x:{grid:{display:false}}};
   }
-  const scales = cfMode==="scurve" ? {
-      y:{ticks:{callback:v=>CUR+" "+fmt(v),font:{size:11}},grid:{color:"#eef2f6"}},
-      x:{grid:{display:false}}
-    } : {
-      y:{position:"left",ticks:{callback:v=>fmt(v),font:{size:11}},grid:{color:"#eef2f6"},title:{display:true,text:"Cumulative",font:{size:10}}},
-      y1:{position:"right",ticks:{callback:v=>fmt(v),font:{size:11}},grid:{display:false},title:{display:true,text:"Monthly",font:{size:10}}},
-      x:{grid:{display:false}}
-    };
   mainChart=new Chart(ctx,{data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.y)}}},
-      scales}});
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.y)}}},scales}});
 }
 
-/* comparison table */
 function renderComparison(){
   const show = (selection[0]==="consolidated") || activeProjects().length>1;
   document.getElementById("cmpWrap").style.display = show?"block":"none";
@@ -538,7 +538,7 @@ function renderComparison(){
   const keys=activeProjects();
   document.getElementById("cmpBody").innerHTML=keys.map(k=>{
     const p=PROJECTS[k],e=p.evm,st=statusFromSPI(e.spi);
-    const cp=Math.min(100,e.pctComplete*100),pp=Math.min(100,e.pctPlanned*100);
+    const cp=Math.min(100,e.pctComplete*100);
     return `<tr>
       <td><div class="pname"><span class="swatch" style="background:${p.accent}"></span>${p.name}<span style="color:var(--muted);font-weight:500;">(${p.code})</span></div>
           <div style="font-size:11.5px;color:var(--muted);margin-left:20px;">${p.sector}</div></td>
@@ -548,34 +548,29 @@ function renderComparison(){
           <span style="color:var(--muted);font-size:11.5px;">/ ${pct(e.pctPlanned)}</span></div></td>
       <td class="num"><b>${e.cpi.toFixed(2)}</b></td>
       <td class="num"><b>${e.spi.toFixed(2)}</b></td>
-      <td><span class="status-badge ${st.cls}">${st.txt}</span></td>
-    </tr>`;}).join("");
+      <td><span class="status-badge ${st.cls}">${st.txt}</span></td></tr>`;}).join("");
 }
 
-/* accordion detail */
 function renderAccordions(){
   const keys=activeProjects();
   const wrap=document.getElementById("accWrap");
   Object.keys(detailCharts).forEach(k=>{if(detailCharts[k]){detailCharts[k].destroy();delete detailCharts[k];}});
   wrap.innerHTML=keys.map(k=>{
-    const p=PROJECTS[k],e=p.evm,st=statusFromSPI(e.spi);
-    const ph=p.phases;
-    const phaseRow=(t,o,extra)=>`<div class="phase-row"><div class="pl"><b>${t}</b><small>${o.start} → ${o.end} · ${o.duration}</small></div><div class="pr">${CUR} ${fmt(o.amount)}</div></div>`;
+    const p=PROJECTS[k],e=p.evm,st=statusFromSPI(e.spi),ph=p.phases;
+    const phaseRow=(t,o)=>`<div class="phase-row"><div class="pl"><b>${t}</b><small>${o.start} → ${o.end} · ${o.duration}</small></div><div class="pr">${CUR} ${fmt(o.amount)}</div></div>`;
     let milestonesHTML="";
     if(p.milestones){
       milestonesHTML=`<div class="subhead">Project Milestones</div>
        <table class="mtable"><thead><tr><th>Milestone</th><th>Planned</th><th>Actual</th><th>Status / Progress</th></tr></thead><tbody>${
         p.milestones.map(m=>`<tr><td>${m.n}</td><td>${m.p}</td><td>${m.a}</td>
           <td>${m.prog!==null?`<span class="mini-prog"><i style="width:${m.prog}%"></i></span>${m.prog}%`:`<span class="tag ${m.st}">${m.st.charAt(0).toUpperCase()+m.st.slice(1)}</span>`}</td></tr>`).join("")
-       }</tbody></table>`;
-    }
+       }</tbody></table>`;}
     let actHTML="";
     if(p.activities){
       actHTML=`<div class="subhead">Current Activities</div>
        <table class="mtable"><thead><tr><th>Activity</th><th>Planned</th><th>Actual</th><th>Status</th></tr></thead><tbody>${
         p.activities.map(m=>`<tr><td>${m.n}</td><td>${m.p}</td><td>${m.a}</td><td><span class="tag ${m.st}">${m.label}</span></td></tr>`).join("")
-       }</tbody></table>`;
-    }
+       }</tbody></table>`;}
     const notesHTML=p.notes?`<div class="notes"><h5>Notes &amp; Remarks</h5><ul>${p.notes.map(n=>`<li>${n}</li>`).join("")}</ul></div>`:"";
     return `<div class="acc" data-proj="${k}">
       <div class="acc-head" onclick="toggleAcc('${k}')">
@@ -586,10 +581,7 @@ function renderAccordions(){
           <div class="ah-stat"><label>Complete</label><b>${pct(e.pctComplete)}</b></div>
           <div class="ah-stat"><label>CPI</label><b>${e.cpi.toFixed(2)}</b></div>
           <div class="ah-stat"><label>SPI</label><b>${e.spi.toFixed(2)}</b></div>
-          <span class="status-badge ${st.cls}">${st.txt}</span>
-          <span class="chev">▾</span>
-        </div>
-      </div>
+          <span class="status-badge ${st.cls}">${st.txt}</span><span class="chev">▾</span></div></div>
       <div class="acc-body">
         <div style="font-size:12.5px;color:var(--muted);margin-top:14px;">${p.structure}</div>
         <div class="detail-grid">
@@ -602,13 +594,8 @@ function renderAccordions(){
             <div class="subhead" style="margin-top:18px;">Cash Flow — Lifecycle (cumulative)</div>
             <div class="det-chart"><canvas id="det_${k}"></canvas></div>
           </div>
-          <div>
-            ${milestonesHTML}${actHTML}${notesHTML}
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join("");
+          <div>${milestonesHTML}${actHTML}${notesHTML}</div>
+        </div></div></div>`;}).join("");
 }
 
 function buildDetailChart(k){
@@ -616,11 +603,10 @@ function buildDetailChart(k){
   const p=PROJECTS[k];const el=document.getElementById("det_"+k);if(!el)return;
   detailCharts[k]=new Chart(el,{data:{labels:p.years.map(String),datasets:[
     {type:"line",label:"Planned",data:p.plannedCum,borderColor:"#9aa9bd",borderDash:[6,4],borderWidth:2,tension:.35,pointRadius:2,fill:false},
-    {type:"line",label:"Actual",data:p.actualCum,borderColor:p.accent,backgroundColor:p.accent+"22",borderWidth:2.6,tension:.35,pointRadius:2.4,fill:true}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
-    plugins:{legend:{display:true,labels:{boxWidth:12,font:{size:11}}},
-      tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.y)}}},
-    scales:{y:{ticks:{callback:v=>fmt(v),font:{size:10}},grid:{color:"#eef2f6"}},x:{grid:{display:false}}}}});
+    {type:"line",label:"Actual",data:p.actualCum,borderColor:p.accent,backgroundColor:p.accent+"22",borderWidth:2.6,tension:.35,pointRadius:2.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+      plugins:{legend:{display:true,labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.y)}}},
+      scales:{y:{ticks:{callback:x=>fmt(x),font:{size:10}},grid:{color:"#eef2f6"}},x:{grid:{display:false}}}}});
 }
 function toggleAcc(k){
   const el=document.querySelector('.acc[data-proj="'+k+'"]');
@@ -628,22 +614,15 @@ function toggleAcc(k){
   if(el.classList.contains("open")) setTimeout(()=>buildDetailChart(k),30);
 }
 
-/* ---------- orchestration ---------- */
 function render(){
   const v=buildView();
   document.getElementById("scopeTitle").textContent=v.title;
   document.getElementById("scopeSub").textContent=v.sub;
   document.getElementById("scopeSector").textContent=v.sector;
-  renderKPIs(v);
-  renderEVM(v);
-  renderChart(v);
-  renderComparison();
-  renderAccordions();
-  // detail title visibility
+  renderKPIs(v); renderEVM(v); renderChart(v); renderComparison(); renderAccordions();
   document.getElementById("detailTitle").style.display = activeProjects().length?"flex":"none";
 }
 
-/* chip behaviour */
 document.querySelectorAll(".chip").forEach(ch=>{
   ch.addEventListener("click",()=>{
     const key=ch.dataset.key;
@@ -652,7 +631,7 @@ document.querySelectorAll(".chip").forEach(ch=>{
       if(selection[0]==="consolidated") selection=[];
       if(selection.includes(key)) selection=selection.filter(x=>x!==key);
       else selection.push(key);
-      if(selection.length===0) selection=["consolidated"]; // never empty
+      if(selection.length===0) selection=["consolidated"];
     }
     syncChips(); render();
   });
