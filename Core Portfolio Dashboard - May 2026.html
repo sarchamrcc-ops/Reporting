@@ -479,22 +479,24 @@ function renderEVM(v){
 }
 
 function gaugeSVG(value){
-  const max=1.4, v=Math.max(0,Math.min(max,value));
+  const max=2, v=Math.max(0,Math.min(max,value));
   const ang=180*(v/max);
   const cx=85,cy=85,r=66;
   function pt(a){const rad=(180-a)*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
   function arc(a0,a1,color,w){const[x0,y0]=pt(a0),[x1,y1]=pt(a1);const large=(a1-a0)>180?1:0;
     return `<path d="M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;}
   const d=x=>180*(x/max);
-  const seg=arc(0,d(0.85),"#cc3f55",13)+arc(d(0.85),d(0.95),"#d99409",13)+arc(d(0.95),180,"#1e9e6a",13);
+  const seg=arc(0,d(0.85),"#cc3f55",13)+arc(d(0.85),d(1.0),"#d99409",13)+arc(d(1.0),180,"#1e9e6a",13);
   const[nx,ny]=pt(ang);
-  const col=value>=0.95?"#1e9e6a":(value>=0.85?"#d99409":"#cc3f55");
-  return `<svg viewBox="0 0 170 104">${seg}
+  const col=value>=1?"#1e9e6a":(value>=0.85?"#d99409":"#cc3f55");
+  return `<svg viewBox="0 0 170 112">
+    <g transform="translate(0,8)">${seg}
     <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#13314f" stroke-width="3.2" stroke-linecap="round"/>
     <circle cx="${cx}" cy="${cy}" r="5.5" fill="#13314f"/>
     <text x="14" y="100" font-size="9" fill="#94a3b8">0</text>
-    <text x="150" y="100" font-size="9" fill="#94a3b8">1.4</text>
-    <text x="${cx}" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="${col}">${value.toFixed(2)}</text></svg>`;
+    <text x="${cx}" y="2" text-anchor="middle" font-size="9" fill="#94a3b8">1</text>
+    <text x="152" y="100" font-size="9" fill="#94a3b8">2</text>
+    <text x="${cx}" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="${col}">${value.toFixed(2)}</text></g></svg>`;
 }
 function renderGauges(e){
   document.getElementById("gauges").innerHTML=
