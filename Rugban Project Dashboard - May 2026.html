@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RCC-PMO · Rugban Project Dashboard — May 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#13314f; --navy2:#1c4a78; --blue:#2f6db5; --blue-soft:#e8f0fa;
+    --ink:#1f2a37; --muted:#647488; --line:#e3e8ef; --bg:#eef2f6; --card:#ffffff;
+    --green:#1e9e6a; --green-bg:#e6f4ee; --amber:#d99409; --amber-bg:#fbf3e0;
+    --red:#cc3f55; --red-bg:#fbe9ec; --shadow:0 1px 3px rgba(16,40,70,.08),0 8px 24px rgba(16,40,70,.06);
+    --gDesign:#2f6db5; --gSup:#6e4ca8; --gCons:#c0883b;
+    --gDesign-bg:#e6effb; --gSup-bg:#ede5f7; --gCons-bg:#fbf1e0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 22px 60px;}
+
+  header{background:linear-gradient(120deg,var(--navy) 0%,var(--navy2) 70%,#23598f 100%);color:#fff;
+    position:sticky;top:0;z-index:50;box-shadow:0 2px 14px rgba(8,24,44,.28);}
+  .head-inner{max-width:1320px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:15px;}
+  .logo{width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));}
+  .brandname{font-size:13px;font-weight:700;letter-spacing:3px;color:#e9c98e;text-transform:uppercase;margin-bottom:1px;}
+  .brand h1{font-size:20px;font-weight:650;letter-spacing:.2px;}
+  .brand p{font-size:12.5px;color:#bcd4ee;margin-top:2px;}
+  .period{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+  .period .badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:6px 14px;border-radius:30px;font-weight:600;font-size:13px;letter-spacing:.4px;}
+  .period small{font-size:11px;color:#a9c5e3;}
+  .period .tagline{font-size:10.5px;color:#d8a85f;letter-spacing:.5px;font-weight:600;}
+
+  .filterbar{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:80px;z-index:40;box-shadow:0 2px 8px rgba(16,40,70,.05);}
+  .filter-inner{max-width:1320px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .filter-label{font-size:11.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);font-weight:600;margin-right:4px;}
+  .chip{border:1.4px solid var(--line);background:#fff;color:var(--ink);padding:6px 13px;border-radius:30px;font-size:12.5px;font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s ease;user-select:none;white-space:nowrap;}
+  .chip:hover{border-color:var(--blue);}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+  .chip.active{color:#fff;border-color:transparent;box-shadow:var(--shadow);}
+  .chip.active .dot{background:#fff;opacity:.9;}
+  .chip[data-grp="all"].active{background:var(--navy);}
+  .chip[data-grp="design"] .dot{background:var(--gDesign);}
+  .chip[data-grp="design"].active{background:var(--gDesign);}
+  .chip[data-grp="supervision"] .dot{background:var(--gSup);}
+  .chip[data-grp="supervision"].active{background:var(--gSup);}
+  .chip[data-grp="construction"] .dot{background:var(--gCons);}
+  .chip[data-grp="construction"].active{background:var(--gCons);}
+  .filter-sep{width:1px;height:22px;background:var(--line);margin:0 4px;}
+  .grp-tag{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;margin:0 4px 0 8px;}
+
+  .scope{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:24px 0 16px;}
+  .scope h2{font-size:22px;font-weight:650;color:var(--navy);}
+  .scope .sub{font-size:13px;color:var(--muted);}
+  .scope .sector-tag{font-size:12px;color:var(--muted);}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 17px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue);}
+  .kpi.k-budget::before{background:var(--navy);}
+  .kpi.k-paid::before{background:var(--green);}
+  .kpi.k-pct::before{background:var(--blue);}
+  .kpi.k-rem::before{background:var(--gCons);}
+  .kpi.k-cnt::before{background:var(--gSup);}
+  .kpi.k-stat::before{background:var(--red);}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;}
+  .kpi .val{font-size:23px;font-weight:700;color:var(--ink);margin-top:6px;letter-spacing:-.3px;}
+  .kpi .val .cur{font-size:12px;font-weight:600;color:var(--muted);margin-right:3px;}
+  .kpi .meta{font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .pill{font-size:11px;font-weight:650;padding:2px 8px;border-radius:20px;}
+  .pill.up{background:var(--green-bg);color:var(--green);}
+  .pill.down{background:var(--red-bg);color:var(--red);}
+  .pill.flat{background:var(--blue-soft);color:var(--blue);}
+  .mini-bar{height:6px;border-radius:6px;background:var(--line);margin-top:10px;overflow:hidden;position:relative;}
+  .mini-bar > i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--blue);display:block;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);}
+  .panel .phead{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .panel .phead h3{font-size:15px;font-weight:650;color:var(--navy);}
+  .panel .pbody{padding:18px 20px;}
+  .grid-main{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-top:18px;}
+  @media(max-width:920px){.grid-main{grid-template-columns:1fr;}}
+
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+  .seg button{border:0;background:#fff;padding:6px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:550;}
+  .seg button.on{background:var(--blue);color:#fff;}
+  .chart-box{position:relative;height:360px;}
+  .chart-box.tall{height:520px;}
+
+  .evm-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .evm-table td{padding:7px 6px;border-bottom:1px solid var(--line);}
+  .evm-table td:first-child{color:var(--muted);}
+  .evm-table td:last-child{text-align:right;font-weight:650;font-variant-numeric:tabular-nums;}
+  .evm-table tr:last-child td{border-bottom:0;}
+  .neg{color:var(--red);} .pos{color:var(--green);}
+
+  .gauges{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+  .gauge{text-align:center;padding:4px 4px;}
+  .gauge svg{width:100%;max-width:170px;height:auto;}
+  .gauge .gname{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.4px;margin-top:2px;}
+
+  .cmp{width:100%;border-collapse:collapse;font-size:13px;}
+  .cmp th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.55px;color:var(--muted);font-weight:600;padding:9px 10px;border-bottom:2px solid var(--line);}
+  .cmp th.num,.cmp td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .cmp td{padding:10px;border-bottom:1px solid var(--line);}
+  .cmp tbody tr:hover{background:#f7fafd;}
+  .cmp .pname{display:flex;align-items:center;gap:9px;font-weight:600;}
+  .cmp .swatch{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+  .cmp .grp-pill{font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:10px;font-weight:650;}
+  .grp-pill.gDesign{background:var(--gDesign-bg);color:var(--gDesign);}
+  .grp-pill.gSup{background:var(--gSup-bg);color:var(--gSup);}
+  .grp-pill.gCons{background:var(--gCons-bg);color:var(--gCons);}
+  .barcell{display:flex;align-items:center;gap:8px;}
+  .barcell .track{flex:1;height:8px;border-radius:6px;background:var(--line);overflow:hidden;min-width:60px;}
+  .barcell .fill{height:100%;border-radius:6px;}
+  .status-badge{font-size:11px;font-weight:650;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+  .st-green{background:var(--green-bg);color:var(--green);}
+  .st-amber{background:var(--amber-bg);color:var(--amber);}
+  .st-red{background:var(--red-bg);color:var(--red);}
+  .st-blue{background:var(--blue-soft);color:var(--blue);}
+
+  .section-title{font-size:13px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);font-weight:650;margin:30px 0 12px;display:flex;align-items:center;gap:10px;}
+  .section-title::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  .ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:920px){.ctx-grid{grid-template-columns:1fr;}}
+
+  .phaseGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media(max-width:780px){.phaseGrid{grid-template-columns:1fr;}}
+  .phase-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fbfcfe;}
+  .phase-card h4{font-size:13px;font-weight:650;color:var(--navy);margin-bottom:4px;}
+  .phase-card .zsub{font-size:11px;color:var(--muted);margin-bottom:10px;letter-spacing:.4px;}
+  .phase-card .mrow{display:flex;justify-content:space-between;font-size:11.5px;padding:4px 0;border-bottom:1px dotted var(--line);}
+  .phase-card .mrow:last-child{border:0;}
+  .phase-card .mrow span:first-child{color:var(--muted);}
+  .phase-card .mrow span:last-child{font-weight:600;font-variant-numeric:tabular-nums;}
+
+  .mtable{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .mtable th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:7px 8px;border-bottom:1.5px solid var(--line);font-weight:600;}
+  .mtable td{padding:7px 8px;border-bottom:1px solid var(--line);}
+  .mtable td.num{text-align:right;}
+  .tag{font-size:10.5px;font-weight:650;padding:2px 8px;border-radius:18px;white-space:nowrap;}
+  .tag.OnTime{background:var(--green-bg);color:var(--green);}
+  .tag.Early{background:var(--blue-soft);color:var(--blue);}
+  .tag.Delayed{background:var(--red-bg);color:var(--red);}
+
+  .notes{background:#f7fafd;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;padding:12px 14px;margin-top:14px;}
+  .notes h5{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--blue);margin-bottom:7px;font-weight:650;}
+  .notes ul{margin:0;padding-left:18px;}
+  .notes li{font-size:12.5px;color:var(--ink);margin-bottom:5px;}
+
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  footer .fbrand{font-weight:650;color:var(--navy);letter-spacing:.5px;}
+
+  .legend-inline{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:10px;}
+  .legend-inline span{display:inline-flex;align-items:center;gap:6px;}
+  .legend-inline i{width:14px;height:3px;border-radius:3px;display:inline-block;}
+  .legend-inline i.box{width:11px;height:11px;border-radius:3px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 120 120" width="52" height="52" role="img" aria-label="RCC-PMO logo">
+          <defs>
+            <linearGradient id="silverA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f4f7"/><stop offset=".42" stop-color="#b6bdc6"/><stop offset=".6" stop-color="#e2e7ec"/><stop offset="1" stop-color="#959da7"/></linearGradient>
+            <linearGradient id="silverB" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1f4f7"/><stop offset=".42" stop-color="#b6bdc6"/><stop offset=".6" stop-color="#e2e7ec"/><stop offset="1" stop-color="#959da7"/></linearGradient>
+            <linearGradient id="maroon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#832c37"/><stop offset=".55" stop-color="#5b1d26"/><stop offset="1" stop-color="#3f1218"/></linearGradient>
+            <radialGradient id="ruby" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="#ff6182"/><stop offset=".45" stop-color="#e51d49"/><stop offset="1" stop-color="#990d2c"/></radialGradient>
+          </defs>
+          <polygon points="60,4 88,32 60,60 32,32" fill="url(#maroon)"/>
+          <path d="M42,28 L57,38 M64,18 L75,40 M48,46 L72,42" stroke="#a85763" stroke-width="1" fill="none" opacity=".5"/>
+          <polygon points="32,32 60,60 32,88 4,60" fill="url(#silverA)"/>
+          <polygon points="88,32 116,60 88,88 60,60" fill="url(#silverB)"/>
+          <polygon points="60,60 88,88 60,116 32,88" fill="url(#ruby)"/>
+          <path d="M60,60 L60,116 M32,88 L88,88 M46,74 L74,102 M74,74 L46,102" stroke="#ff9bb0" stroke-width=".8" fill="none" opacity=".5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brandname">RCC-PMO</div>
+        <h1>Rugban (RBD) — Project Dashboard</h1>
+        <p>Business District &middot; Retail · Office · Commercial · Residential</p>
+      </div>
+    </div>
+    <div class="period">
+      <div class="badge">Reporting Period — May 2026</div>
+      <small>All figures in Saudi Riyal (SAR)</small>
+      <div class="tagline">RCC-PMO — Digital Transformation Initiative</div>
+    </div>
+  </div>
+</header>
+
+<div class="filterbar">
+  <div class="filter-inner" id="filterRow">
+    <span class="filter-label">Cost Category</span>
+    <button class="chip active" data-grp="all" data-key="ALL"><span class="dot"></span>All Categories</button>
+    <span class="filter-sep"></span>
+    <span class="grp-tag">Design</span>
+    <span id="designChips"></span>
+    <span class="filter-sep"></span>
+    <span class="grp-tag">Supervision</span>
+    <span id="supChips"></span>
+    <span class="filter-sep"></span>
+    <span class="grp-tag">Construction</span>
+    <span id="consChips"></span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="scope">
+    <div>
+      <h2 id="scopeTitle">All Cost Categories</h2>
+      <div class="sub" id="scopeSub">Full Rugban project scope — 17 cost categories</div>
+    </div>
+    <div class="sector-tag" id="scopeSector"></div>
+  </div>
+
+  <div class="kpis" id="kpiRow"></div>
+
+  <div class="grid-main">
+    <div class="panel">
+      <div class="phead">
+        <h3 id="cbTitle">Cost Category Breakdown — Budget vs Paid</h3>
+        <div class="seg" id="cbSeg">
+          <button data-mode="bar" class="on">Bar Chart</button>
+          <button data-mode="table">Table</button>
+        </div>
+      </div>
+      <div class="pbody">
+        <div id="cbChartWrap" class="chart-box tall"><canvas id="cbChart"></canvas></div>
+        <div id="cbTableWrap" style="display:none;">
+          <table class="cmp"><thead><tr>
+            <th>Category</th><th>Group</th><th class="num">Budget</th><th class="num">Paid</th><th>% Paid</th><th class="num">Remaining</th>
+          </tr></thead><tbody id="cbTableBody"></tbody></table>
+        </div>
+        <div class="legend-inline">
+          <span><i class="box" style="background:#cfdcec;"></i> Budget</span>
+          <span><i class="box" style="background:var(--blue);"></i> Paid to date</span>
+          <span><i class="box" style="background:var(--gDesign);"></i> Design</span>
+          <span><i class="box" style="background:var(--gSup);"></i> Supervision + PMC</span>
+          <span><i class="box" style="background:var(--gCons);"></i> Construction</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><h3>Earned Value Management <span id="evmScope" style="font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.3px;">— full project</span></h3></div>
+      <div class="pbody">
+        <table class="evm-table" id="evmTable"></table>
+        <div class="gauges" id="gauges"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Project Cash Flow — Planned vs Actual</div>
+  <div class="panel">
+    <div class="phead">
+      <h3>Lifecycle &amp; Monthly Cash Flow</h3>
+      <div class="seg" id="cfSeg">
+        <button data-mode="scurve" class="on">Lifecycle S-Curve</button>
+        <button data-mode="monthly">2026 Monthly</button>
+      </div>
+    </div>
+    <div class="pbody">
+      <div class="chart-box"><canvas id="cashChart"></canvas></div>
+      <div class="legend-inline">
+        <span><i style="background:#9aa9bd;"></i> Planned (cumulative)</span>
+        <span><i style="background:var(--blue);"></i> Actual (cumulative)</span>
+        <span id="barLegend" style="display:none;"><i class="box" style="background:#cfdcec;"></i> Monthly bars</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Project Context — Phases · Milestones · Activities</div>
+  <div class="ctx-grid">
+    <div class="panel"><div class="phead"><h3>Three Phases &middot; Zoned Delivery</h3></div>
+      <div class="pbody">
+        <div class="phaseGrid" id="phaseGrid"></div>
+      </div>
+    </div>
+    <div class="panel"><div class="phead"><h3>Current Activities &amp; Status</h3></div>
+      <div class="pbody">
+        <table class="mtable"><thead><tr><th>Activity</th><th>Planned</th><th>Actual</th><th>Status</th></tr></thead>
+          <tbody id="actBody"></tbody></table>
+        <div class="notes" id="notesBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div><span class="fbrand">RCC-PMO</span> &middot; Rugban Project Dashboard &middot; Reporting period May 2026 &middot; Source: RBD project workbook (cost categories &amp; line-item cash flow).</div>
+    <div>CPI = Cost Performance Index &middot; SPI = Schedule Performance Index &middot; BAC = Budget at Completion</div>
+  </footer>
+</div>
+
+<script>
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const CUR="SAR";
+
+/* ---------- Cost categories (17 flat) ---------- */
+/* b = Budget at Completion (BAC), p = Actual Cost paid to date (AC),
+   pv = Planned Value through May 2026.
+   Convention from the project workbook: EV = AC (CPI = 1.00 at category & project level).
+   Design phase contractually ended 31 Jan 2025, so every design sub-category's PV = its full budget.
+   Supervision + PMC and Construction PV reflect the cumulative planned cash flow through May 2026.
+   Sums: ΣBAC = 428,657,918  ·  ΣAC = 16,889,449  ·  ΣPV = 19,100,551 (matches the project EVM). */
+const CATS = [
+  {key:"DESIGN", code:"Design",   name:"Lead Architectural Design",          desc:"Commercial Project (Abdulmohsin Altheyab)", grp:"design", b:4970000, p:4720300, pv:4970000},
+  {key:"COM",    code:"Com.",     name:"Commercial Sub-Consultant",          desc:"Design sub-consultancy",                    grp:"design", b:387000,  p:193500,  pv:387000},
+  {key:"RES",    code:"Res.",     name:"Residential Sub-Consultant",         desc:"Design sub-consultancy",                    grp:"design", b:220000,  p:220000,  pv:220000},
+  {key:"SOIL",   code:"Soil",     name:"Soil Investigation",                 desc:"Geotechnical testing & soil drilling",      grp:"design", b:54953,   p:54953,   pv:54953},
+  {key:"SURVEY", code:"Survey",   name:"Topographic Survey",                 desc:"Boundary & topographic survey",             grp:"design", b:75000,   p:18750,   pv:75000},
+  {key:"TIS",    code:"TIS",      name:"Traffic Impact Study",               desc:"Traffic modelling & approvals",             grp:"design", b:520000,  p:0,       pv:520000},
+  {key:"LS",     code:"LS",       name:"Landscape Design",                   desc:"Landscape architecture",                    grp:"design", b:54000,   p:54000,   pv:54000},
+  {key:"FLS1",   code:"FLS 1",    name:"Fire & Life Safety — Phase 1",       desc:"FLS consultancy (early phases)",            grp:"design", b:184000,  p:184000,  pv:184000},
+  {key:"VISID",  code:"Vis. ID",  name:"Pre-Contract Cost Consultancy",      desc:"D.G Jones & Partners (visual ID & QS)",     grp:"design", b:1373526, p:412058,  pv:1373526},
+  {key:"COST",   code:"Cost",     name:"Cost Consultancy",                   desc:"Quantity surveying & cost control",         grp:"design", b:140000,  p:0,       pv:140000},
+  {key:"WASTE",  code:"Waste",    name:"Waste Management Design",            desc:"Environmental impact / NCEC",               grp:"design", b:400000,  p:0,       pv:400000},
+  {key:"GACA",   code:"GACA",     name:"GACA Approvals",                     desc:"Civil aviation authority permits",          grp:"design", b:150000,  p:0,       pv:150000},
+  {key:"JETFAN", code:"Jet Fan",  name:"Jet Fan System Design",              desc:"Smoke extraction & ventilation",            grp:"design", b:100000,  p:50000,   pv:100000},
+  {key:"FLS2",   code:"FLS 2",    name:"Fire & Life Safety — Phase 2 (FGH)", desc:"FLS consultancy (Zones F·G·H)",             grp:"design", b:1000000, p:0,       pv:1000000},
+  {key:"LIGHT",  code:"Lighting", name:"Exterior Lighting Design",           desc:"Façade & landscape lighting",               grp:"design", b:50000,   p:0,       pv:50000},
+  {key:"SUP",    code:"Sup + PMC",name:"Supervision + PMC",                  desc:"Construction supervision & project management consultancy", grp:"supervision", b:16568650, p:1935500, pv:2982357},
+  {key:"CONST",  code:"Construction", name:"Construction Main Contract",     desc:"Site works + excavation + change orders (Zones A–H)", grp:"construction", b:402410789, p:9046388, pv:6439715}
+];
+
+/* Compute aggregate EVM for any subset of categories. Returns null CPI/SPI when undefined. */
+function computeEVM(items){
+  const bac = items.reduce((s,c)=>s+c.b,0);
+  const ac  = items.reduce((s,c)=>s+c.p,0);
+  const ev  = ac;                              // project convention: EV = AC (CV = 0)
+  const pv  = items.reduce((s,c)=>s+c.pv,0);
+  const cpi = ac>0 ? ev/ac : null;
+  const spi = pv>0 ? ev/pv : null;
+  const cv  = ev - ac;
+  const sv  = ev - pv;
+  const eac = (cpi && cpi>0) ? bac/cpi : bac;
+  const tcpi= (bac-ac)!==0 ? (bac-ev)/(bac-ac) : 1;
+  const pctComplete = bac>0 ? ev/bac : 0;
+  const pctPlanned  = bac>0 ? pv/bac : 0;
+  return {bac,ac,ev,pv,cv,sv,cpi,spi,eac,tcpi,pctComplete,pctPlanned};
+}
+
+const GRPMETA={
+  design:      {color:"var(--gDesign)",pill:"gDesign",label:"Design"},
+  supervision: {color:"var(--gSup)",  pill:"gSup",   label:"Supervision"},
+  construction:{color:"var(--gCons)", pill:"gCons",  label:"Construction"}
+};
+
+/* ---------- Project-level EVM (always) ---------- */
+const PROJECT_EVM = {bac:428657918,pctComplete:0.0394,pctPlanned:0.0446,ac:16889449,ev:16889449,pv:19100551,cv:0,sv:-2211102,cpi:1.00,spi:0.88,eac:428657918,tcpi:1.00};
+
+const CF = {
+  years:[2023,2024,2025,2026,2027,2028,2029],
+  plannedCum:[6049448,6519948,17520741,151307145,283586573,415176001,428657918],
+  actualCum:[0,2770244,9445625,16889449,16889449,16889449,16889449],
+  mPlanned:[315962,315962,315962,315962,315962,18886656,18886656,18886656,18886656,18886656,18886656,18886656],
+  mCumPlanned:[17836703,18152665,18468627,18784589,19100551,37987207,56873863,75760520,94647176,113533832,132420489,151307145],
+  mActual:[1488765,1488765,1488765,1488765,1488765,0,0,0,0,0,0,0],
+  mCumActual:[10934390,12423155,13911919,15400684,16889449,16889449,16889449,16889449,16889449,16889449,16889449,16889449]
+};
+
+const PHASES = [
+  {name:"Phase 1", zones:"Zones A · B · E", rows:[
+    ["Design Early End","30 Nov 2025"],["Tendering Prep. End","31 Jan 2026"],
+    ["Bidding / Financing End","31 Mar 2026"],["Construction Start","1 May 2026"],
+    ["Construction Duration","24 months"],["Leasing End","30 Apr 2027"],
+    ["Construction End","30 Apr 2028"],["Opening Expected","1 Jan 2028"]
+  ]},
+  {name:"Phase 2", zones:"Zones C · D", rows:[
+    ["Design Early End","28 Feb 2026"],["Tendering Prep. End","30 Apr 2026"],
+    ["Bidding / Financing End","30 Jun 2026"],["Construction Start","1 Aug 2026"],
+    ["Construction Duration","24 months"],["Leasing End","30 Jul 2027"],
+    ["Construction End","30 Jul 2028"],["Opening Expected","1 Sep 2028"]
+  ]},
+  {name:"Phase 3", zones:"Zones F · G · H", rows:[
+    ["Design Early End","30 Jun 2026"],["Tendering Prep. End","31 Aug 2026"],
+    ["Bidding / Financing End","—"],["Construction Start","1 Dec 2026"],
+    ["Construction Duration","24 months"],["Leasing End","Nov 2027"],
+    ["Construction End","Nov 2028"],["Opening Expected","1 Jan 2029"]
+  ]}
+];
+
+const ACTIVITIES = [
+  {n:"PH.01 Early Design",          p:"7 Aug 2025",  a:"7 Aug 2025",  st:"OnTime",  label:"On Time"},
+  {n:"PH.02 Early Design",          p:"2 Oct 2025",  a:"1 Oct 2025",  st:"OnTime",  label:"On Time"},
+  {n:"PH.01 Tender PKG",            p:"7 Oct 2025",  a:"4 Dec 2025",  st:"Delayed", label:"Delayed"},
+  {n:"PH.03 Early Design",          p:"21 Nov 2025", a:"30 Nov 2025", st:"Delayed", label:"Delayed"},
+  {n:"PH.02 Tender PKG",            p:"2 Dec 2025",  a:"4 Dec 2025",  st:"OnTime",  label:"On Time"},
+  {n:"PH.01 Bidding / Financing",   p:"7 Dec 2025",  a:"30 Dec 2025", st:"Delayed", label:"Delayed"},
+  {n:"PH.01 Construction",          p:"8 Dec 2025",  a:"31 Dec 2025", st:"Delayed", label:"Delayed"},
+  {n:"PH.04 Early Design",          p:"15 Dec 2025", a:"30 Nov 2025", st:"Early",   label:"Early"}
+];
+
+const NOTES = [
+  "Early excavation works started at site to mitigate the delay on tendering and bidding milestones.",
+  "Construction main contract awarded; mobilisation underway.",
+  "Phase 1 (Zones A·B·E) leads the delivery sequence; Phases 2 and 3 staggered at 3-month intervals."
+];
+
+/* ---------- state ---------- */
+let selection = ["ALL"];        // either ["ALL"] or subset of keys
+let cbMode = "bar";             // bar | table
+let cfMode = "scurve";          // scurve | monthly
+let cbChart=null, cashChart=null;
+
+function fmt(n){ if(n===0)return"0"; const a=Math.abs(n); const s=n<0?"-":"";
+  if(a>=1e9) return s+(a/1e9).toFixed(2)+"B";
+  if(a>=1e6) return s+(a/1e6).toFixed(2)+"M";
+  if(a>=1e3) return s+(a/1e3).toFixed(0)+"K";
+  return s+Math.round(a).toLocaleString();}
+function full(n){return Math.round(n).toLocaleString();}
+function pctv(x){return (x*100).toFixed(1)+"%";}
+function statusFromSPI(spi){ if(spi>=0.95) return {cls:"st-green",txt:"On Track"};
+  if(spi>=0.85) return {cls:"st-amber",txt:"Minor Delay"}; return {cls:"st-red",txt:"Behind Schedule"};}
+function statusFromPaid(pct){ if(pct>=0.95) return {cls:"st-green",txt:"Settled"};
+  if(pct>=0.5) return {cls:"st-amber",txt:"Active"};
+  if(pct>0) return {cls:"st-blue",txt:"Started"}; return {cls:"st-red",txt:"Not Started"};}
+
+/* ---------- selection helpers ---------- */
+function activeKeys(){ return selection[0]==="ALL" ? CATS.map(c=>c.key) : selection.slice(); }
+function selected(){ return CATS.filter(c=>activeKeys().includes(c.key)); }
+function aggregate(){
+  const sel=selected();
+  const b=sel.reduce((s,c)=>s+c.b,0);
+  const p=sel.reduce((s,c)=>s+c.p,0);
+  return {budget:b,paid:p,remaining:b-p,pct:b?p/b:0,count:sel.length};
+}
+
+/* ---------- chips ---------- */
+function buildChips(){
+  const make=(c)=>`<button class="chip" data-grp="${c.grp}" data-key="${c.key}"><span class="dot"></span>${c.code}</button>`;
+  document.getElementById("designChips").innerHTML=CATS.filter(c=>c.grp==="design").map(make).join("");
+  document.getElementById("supChips").innerHTML  =CATS.filter(c=>c.grp==="supervision").map(make).join("");
+  document.getElementById("consChips").innerHTML =CATS.filter(c=>c.grp==="construction").map(make).join("");
+  document.querySelectorAll(".chip").forEach(ch=>{
+    ch.addEventListener("click",()=>{
+      const key=ch.dataset.key;
+      if(key==="ALL"){ selection=["ALL"]; }
+      else{
+        if(selection[0]==="ALL") selection=[];
+        if(selection.includes(key)) selection=selection.filter(x=>x!==key);
+        else selection.push(key);
+        if(selection.length===0) selection=["ALL"];
+      }
+      syncChips(); renderAll();
+    });
+  });
+}
+function syncChips(){
+  document.querySelectorAll(".chip").forEach(ch=>{
+    const key=ch.dataset.key;
+    const on=(key==="ALL")?selection[0]==="ALL":(selection[0]!=="ALL"&&selection.includes(key));
+    ch.classList.toggle("active",on);
+  });
+}
+
+/* ---------- KPIs (selection-aware) ---------- */
+function renderKPIs(e){
+  const st = (e.spi==null) ? {cls:"st-blue",txt:"Not Started"} : statusFromSPI(e.spi);
+  const total=CATS.reduce((s,c)=>s+c.b,0);
+  const sharePct=total?(e.bac/total*100).toFixed(1):"0";
+  const count = (selection[0]==="ALL") ? CATS.length : selection.length;
+  const cpiTxt = e.cpi==null ? "—" : e.cpi.toFixed(2);
+  const spiTxt = e.spi==null ? "—" : e.spi.toFixed(2);
+  const aheadPts = ((e.pctComplete-e.pctPlanned)*100).toFixed(2);
+  document.getElementById("kpiRow").innerHTML=`
+  <div class="kpi k-budget"><div class="label">Selected Budget</div>
+    <div class="val"><span class="cur">${CUR}</span>${fmt(e.bac)}</div>
+    <div class="meta">${sharePct}% of project · ${count} categor${count===1?"y":"ies"}</div></div>
+  <div class="kpi k-paid"><div class="label">Paid to Date</div>
+    <div class="val"><span class="cur">${CUR}</span>${fmt(e.ac)}</div>
+    <div class="meta">Planned: ${CUR} ${fmt(e.pv)}</div></div>
+  <div class="kpi k-pct"><div class="label">% Paid (selection)</div>
+    <div class="val">${pctv(e.pctComplete)}</div>
+    <div class="mini-bar"><i style="width:${Math.min(100,e.pctComplete*100)}%"></i></div></div>
+  <div class="kpi k-rem"><div class="label">Remaining Commitment</div>
+    <div class="val"><span class="cur">${CUR}</span>${fmt(e.bac-e.ac)}</div>
+    <div class="meta">Open value to be paid</div></div>
+  <div class="kpi k-cnt"><div class="label">Progress vs Planned</div>
+    <div class="val">${pctv(e.pctComplete)}</div>
+    <div class="meta">Planned ${pctv(e.pctPlanned)} · <span class="pill ${e.pctComplete>=e.pctPlanned?'up':'down'}">${aheadPts} pts</span></div></div>
+  <div class="kpi k-stat"><div class="label">Schedule Status</div>
+    <div class="val" style="font-size:18px;margin-top:9px;"><span class="status-badge ${st.cls}">${st.txt}</span></div>
+    <div class="meta">CPI ${cpiTxt} · SPI ${spiTxt}</div></div>`;
+}
+
+/* ---------- Scope title ---------- */
+function renderScope(){
+  const sel=selected();
+  document.getElementById("scopeTitle").textContent = selection[0]==="ALL" ? "All Cost Categories" : sel.map(c=>c.code).join(", ");
+  document.getElementById("scopeSub").textContent  = selection[0]==="ALL" ? "Full Rugban project scope — 17 cost categories" : sel.length+" categor"+(sel.length===1?"y":"ies")+" selected";
+  const groups=[...new Set(sel.map(c=>GRPMETA[c.grp].label))].join(" · ");
+  document.getElementById("scopeSector").textContent = groups;
+}
+
+/* ---------- Breakdown chart / table ---------- */
+function renderBreakdown(){
+  const sel=selected();
+  document.getElementById("cbTitle").textContent = "Cost Category Breakdown — Budget vs Paid ("+sel.length+")";
+  if(cbMode==="bar"){
+    document.getElementById("cbChartWrap").style.display="block";
+    document.getElementById("cbTableWrap").style.display="none";
+    if(cbChart) cbChart.destroy();
+    const ctx=document.getElementById("cbChart");
+    // sort selected by budget desc for readability
+    const items=sel.slice().sort((a,b)=>b.b-a.b);
+    const labels=items.map(c=>c.code);
+    const bColors=items.map(c=>getComputedStyle(document.documentElement).getPropertyValue("--g"+(c.grp==="design"?"Design":c.grp==="supervision"?"Sup":"Cons")).trim());
+    cbChart=new Chart(ctx,{type:"bar",
+      data:{labels,datasets:[
+        {label:"Budget",data:items.map(c=>c.b),backgroundColor:"#cfdcec",borderRadius:4,categoryPercentage:.78,barPercentage:.9},
+        {label:"Paid",  data:items.map(c=>c.p),backgroundColor:bColors,borderRadius:4,categoryPercentage:.78,barPercentage:.9}
+      ]},
+      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},
+          tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.x),
+                              afterLabel:c=>{const it=items[c.dataIndex]; return c.dataset.label==="Paid"?("% Paid: "+pctv(it.b?it.p/it.b:0)):"";}}}},
+        scales:{x:{type:"logarithmic",ticks:{callback:v=>CUR+" "+fmt(v),font:{size:10}},grid:{color:"#eef2f6"}},
+                y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+  } else {
+    document.getElementById("cbChartWrap").style.display="none";
+    document.getElementById("cbTableWrap").style.display="block";
+    const items=sel.slice().sort((a,b)=>b.b-a.b);
+    document.getElementById("cbTableBody").innerHTML=items.map(c=>{
+      const pctP=c.b?c.p/c.b:0; const st=statusFromPaid(pctP);
+      const meta=GRPMETA[c.grp];
+      return `<tr>
+        <td><div class="pname"><span class="swatch" style="background:${meta.color}"></span><div><div>${c.code} <span style="color:var(--muted);font-weight:500;">— ${c.name}</span></div><div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:1px;">${c.desc}</div></div></div></td>
+        <td><span class="grp-pill ${meta.pill}">${meta.label}</span></td>
+        <td class="num">${CUR} ${fmt(c.b)}</td>
+        <td class="num">${CUR} ${fmt(c.p)}</td>
+        <td><div class="barcell"><div class="track"><div class="fill" style="width:${Math.min(100,pctP*100)}%;background:${meta.color};"></div></div><span style="font-variant-numeric:tabular-nums;font-weight:600;">${pctv(pctP)}</span><span class="status-badge ${st.cls}" style="margin-left:6px;">${st.txt}</span></div></td>
+        <td class="num">${CUR} ${fmt(c.b-c.p)}</td>
+      </tr>`;
+    }).join("");
+  }
+}
+
+/* ---------- EVM (selection-aware) ---------- */
+function renderEVM(e){
+  const cpiTxt = e.cpi==null ? "—" : e.cpi.toFixed(2);
+  const spiTxt = e.spi==null ? "—" : e.spi.toFixed(2);
+  const cpiCls = e.cpi==null ? "" : (e.cpi>=1?"pos":"neg");
+  const spiCls = e.spi==null ? "" : (e.spi>=1?"pos":"neg");
+  const rows=[
+    ["Budget at Completion (BAC)",CUR+" "+full(e.bac),""],
+    ["Actual Cost (AC)",CUR+" "+full(e.ac),""],
+    ["Earned Value (EV)",CUR+" "+full(e.ev),""],
+    ["Planned Value (PV)",CUR+" "+full(e.pv),""],
+    ["Cost Variance (CV)",(e.cv>=0?"":"−")+CUR+" "+full(Math.abs(e.cv)),e.cv>=0?"pos":"neg"],
+    ["Schedule Variance (SV)",(e.sv>=0?"":"−")+CUR+" "+full(Math.abs(e.sv)),e.sv>=0?"pos":"neg"],
+    ["Cost Performance Index (CPI)",cpiTxt,cpiCls],
+    ["Schedule Performance Index (SPI)",spiTxt,spiCls],
+    ["Estimate at Completion (EAC)",CUR+" "+full(e.eac),""],
+    ["To-Complete Perf. Index (TCPI)",e.tcpi.toFixed(2),""]];
+  document.getElementById("evmTable").innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td class="${r[2]}">${r[1]}</td></tr>`).join("");
+  const scope=document.getElementById("evmScope");
+  if(scope) scope.textContent = (selection[0]==="ALL") ? "— full project (all 17 categories)" : ("— selection ("+selection.length+(selection.length===1?" category":" categories")+")");
+  renderGauges(e);
+}
+function gaugeSVG(value){
+  const max=2, v=Math.max(0,Math.min(max,value));
+  const ang=180*(v/max);
+  const cx=85,cy=85,r=66;
+  function pt(a){const rad=(180-a)*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
+  function arc(a0,a1,color,w){const[x0,y0]=pt(a0),[x1,y1]=pt(a1);const large=(a1-a0)>180?1:0;
+    return `<path d="M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;}
+  const d=x=>180*(x/max);
+  const seg=arc(0,d(0.85),"#cc3f55",13)+arc(d(0.85),d(1.0),"#d99409",13)+arc(d(1.0),180,"#1e9e6a",13);
+  const[nx,ny]=pt(ang);
+  const col=value>=1?"#1e9e6a":(value>=0.85?"#d99409":"#cc3f55");
+  return `<svg viewBox="0 0 170 112">
+    <g transform="translate(0,8)">${seg}
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#13314f" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="5.5" fill="#13314f"/>
+    <text x="14" y="100" font-size="9" fill="#94a3b8">0</text>
+    <text x="${cx}" y="2" text-anchor="middle" font-size="9" fill="#94a3b8">1</text>
+    <text x="152" y="100" font-size="9" fill="#94a3b8">2</text>
+    <text x="${cx}" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="${col}">${value.toFixed(2)}</text></g></svg>`;
+}
+function gaugeNA(){
+  return `<svg viewBox="0 0 170 112">
+    <g transform="translate(0,8)">
+    <path d="M19 85 A 66 66 0 0 1 151 85" stroke="#e3e8ef" stroke-width="13" fill="none" stroke-linecap="round"/>
+    <text x="85" y="56" text-anchor="middle" font-size="20" font-weight="700" fill="#94a3b8">—</text>
+    <text x="85" y="76" text-anchor="middle" font-size="9" fill="#94a3b8">no activity yet</text>
+    <text x="14" y="100" font-size="9" fill="#94a3b8">0</text>
+    <text x="85" y="2" text-anchor="middle" font-size="9" fill="#94a3b8">1</text>
+    <text x="152" y="100" font-size="9" fill="#94a3b8">2</text>
+    </g></svg>`;
+}
+function renderGauges(e){
+  const cpiG = e.cpi==null ? gaugeNA() : gaugeSVG(e.cpi);
+  const spiG = e.spi==null ? gaugeNA() : gaugeSVG(e.spi);
+  document.getElementById("gauges").innerHTML=
+    `<div class="gauge">${cpiG}<div class="gname">CPI — Cost</div></div>
+     <div class="gauge">${spiG}<div class="gname">SPI — Schedule</div></div>`;
+}
+
+/* ---------- Cash flow chart ---------- */
+function renderCash(){
+  if(cashChart) cashChart.destroy();
+  const ctx=document.getElementById("cashChart");
+  document.getElementById("barLegend").style.display = cfMode==="monthly"?"inline-flex":"none";
+  let labels,datasets,scales;
+  if(cfMode==="scurve"){
+    labels=CF.years.map(String);
+    datasets=[
+      {type:"line",label:"Planned (cumulative)",data:CF.plannedCum,borderColor:"#9aa9bd",backgroundColor:"rgba(154,169,189,.10)",
+       borderWidth:2.4,borderDash:[6,4],tension:.35,pointRadius:2.5,pointBackgroundColor:"#9aa9bd",fill:true},
+      {type:"line",label:"Actual (cumulative)",data:CF.actualCum,borderColor:"#2f6db5",backgroundColor:"rgba(47,109,181,.14)",
+       borderWidth:3,tension:.35,pointRadius:2.8,pointBackgroundColor:"#2f6db5",fill:true}];
+    scales={y:{ticks:{callback:x=>CUR+" "+fmt(x),font:{size:11}},grid:{color:"#eef2f6"}},x:{grid:{display:false}}};
+  }else{
+    labels=MONTHS;
+    datasets=[
+      {type:"bar",label:"Planned (monthly)",data:CF.mPlanned,backgroundColor:"#cfdcec",borderRadius:3,order:3,yAxisID:"y1"},
+      {type:"bar",label:"Actual (monthly)",data:CF.mActual,backgroundColor:"#2f6db5",borderRadius:3,order:2,yAxisID:"y1"},
+      {type:"line",label:"Planned (cumulative)",data:CF.mCumPlanned,borderColor:"#9aa9bd",borderWidth:2.2,borderDash:[6,4],tension:.3,pointRadius:0,order:1,yAxisID:"y"},
+      {type:"line",label:"Actual (cumulative)",data:CF.mCumActual,borderColor:"#13314f",borderWidth:2.6,tension:.3,pointRadius:0,order:0,yAxisID:"y"}];
+    scales={y:{position:"left",ticks:{callback:x=>fmt(x),font:{size:11}},grid:{color:"#eef2f6"},title:{display:true,text:"Cumulative",font:{size:10}}},
+      y1:{position:"right",ticks:{callback:x=>fmt(x),font:{size:11}},grid:{display:false},title:{display:true,text:"Monthly",font:{size:10}}},
+      x:{grid:{display:false}}};
+  }
+  cashChart=new Chart(ctx,{data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+full(c.parsed.y)}}},scales}});
+}
+
+/* ---------- Context renderers ---------- */
+function renderPhases(){
+  document.getElementById("phaseGrid").innerHTML = PHASES.map(p=>`
+    <div class="phase-card">
+      <h4>${p.name}</h4>
+      <div class="zsub">${p.zones}</div>
+      ${p.rows.map(r=>`<div class="mrow"><span>${r[0]}</span><span>${r[1]}</span></div>`).join("")}
+    </div>`).join("");
+}
+function renderActivities(){
+  document.getElementById("actBody").innerHTML = ACTIVITIES.map(a=>
+    `<tr><td>${a.n}</td><td>${a.p}</td><td>${a.a}</td><td><span class="tag ${a.st}">${a.label}</span></td></tr>`).join("");
+  document.getElementById("notesBox").innerHTML =
+    `<h5>Notes &amp; Remarks</h5><ul>${NOTES.map(n=>`<li>${n}</li>`).join("")}</ul>`;
+}
+
+/* ---------- Orchestration ---------- */
+function renderAll(){
+  const e = computeEVM(selected());
+  renderScope();
+  renderKPIs(e);
+  renderEVM(e);
+  renderBreakdown();
+  renderCash();
+}
+
+document.querySelectorAll("#cbSeg button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("#cbSeg button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); cbMode=b.dataset.mode; renderBreakdown();
+  });
+});
+document.querySelectorAll("#cfSeg button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("#cfSeg button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); cfMode=b.dataset.mode; renderCash();
+  });
+});
+
+buildChips();
+syncChips();
+renderPhases();
+renderActivities();
+renderAll();   // computes EVM and renders KPIs + EVM table + gauges together
+</script>
+</body>
+</html>
