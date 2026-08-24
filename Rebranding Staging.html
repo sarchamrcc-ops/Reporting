@@ -10,12 +10,20 @@ body{margin:0;font:13px/1.4 Calibri,Segoe UI,Arial,sans-serif;background:#fff;co
 header{background:#C65911;color:#FCE4D6;padding:14px 18px}
 header h1{margin:0;font-size:19px;letter-spacing:.5px}
 header p{margin:4px 0 0;font-size:12px;opacity:.9}
-#bar{display:flex;gap:18px;align-items:center;padding:10px 18px;background:#F2F2F2;border-bottom:1px solid #808080;flex-wrap:wrap}
-#bar label{font-weight:bold}
+#bar,#filters{display:flex;gap:14px;align-items:center;padding:10px 18px;background:#F2F2F2;flex-wrap:wrap}
+#bar{border-bottom:1px solid #D9D9D9}
+#filters{border-bottom:1px solid #808080;background:#FCE4D6}
+#bar label,#filters label{font-weight:bold}
 .key{display:flex;gap:6px;align-items:center}
 .sw{width:14px;height:14px;border:1px solid #808080;display:inline-block}
-button{padding:5px 12px;cursor:pointer}
-#wrap{overflow:auto;max-height:74vh;border-top:1px solid #ccc}
+button{padding:5px 12px;cursor:pointer;font:inherit;border:1px solid #808080;background:#fff;border-radius:3px}
+button:hover{background:#F2F2F2}
+button.f{padding:5px 14px}
+button.f .sw{margin-right:6px;vertical-align:-2px}
+button.f.on{background:#C65911;color:#fff;border-color:#C65911;font-weight:bold}
+button.f.on .sw{border-color:#fff}
+#count{font-size:12px;color:#555}
+#wrap{overflow:auto;max-height:70vh;border-top:1px solid #ccc}
 table{border-collapse:collapse}
 th,td{border:1px solid #D9D9D9;padding:2px 5px;white-space:nowrap}
 thead th{position:sticky;top:0;background:#F2F2F2;z-index:3;font-size:11px}
@@ -36,6 +44,7 @@ td.pref{border-left:2px dashed #808080}
 .b{height:16px;margin:3px 1px;border:1px solid #808080;border-radius:2px}
 .b.A{background:var(--peach)}.b.B{background:var(--grey)}.b.C{background:var(--blue)}
 .b.over{outline:2px solid var(--late)}
+.b.ghost{opacity:.28}
 input[type=date]{font:inherit;width:108px;border:1px solid #bbb;padding:1px}
 input[type=number]{font:inherit;width:52px;border:1px solid #bbb;padding:1px;text-align:center}
 input.ovr{background:#FFF2CC;border-color:#BF8F00;font-weight:bold}
@@ -59,12 +68,20 @@ tr.grp td{background:#C65911;color:#FCE4D6;font-weight:bold;font-size:14px}
   <span><label>Preferred finish:</label> <input type="date" id="ppref" value="2026-09-15"></span>
   <span><label>Latest allowed:</label> <input type="date" id="plimit" value="2026-09-30"></span>
   <button id="reset">Reset all overrides</button>
-  <span class="key"><i class="sw" style="background:#F8CBAD"></i>Contractor A</span>
-  <span class="key"><i class="sw" style="background:#BFBFBF"></i>Contractor B</span>
-  <span class="key"><i class="sw" style="background:#BDD7EE"></i>Contractor C</span>
-  <span class="key"><i class="sw" style="background:#FFF2CC;border-color:#BF8F00"></i>overridden</span>
 </div>
-<div class="hint">Edit any <b>Start</b> to pin a task (turns yellow) — everything downstream shifts with it. Edit <b>Days</b> to re-flow the chain. Clear a start field to hand it back to the dependency. Amber finish = past 15 Sep (acceptable); red = past 30 Sep (not acceptable).</div>
+
+<div id="filters">
+  <label>Show:</label>
+  <button class="f" data-f="ALL">All contractors</button>
+  <button class="f" data-f="A"><i class="sw" style="background:#F8CBAD"></i>Contractor A</button>
+  <button class="f" data-f="B"><i class="sw" style="background:#BFBFBF"></i>Contractor B</button>
+  <button class="f" data-f="C"><i class="sw" style="background:#BDD7EE"></i>Contractor C</button>
+  <span style="border-left:1px solid #C65911;padding-left:14px">
+    <label><input type="checkbox" id="ghost"> keep other contractors as faded bars</label>
+  </span>
+  <span id="count"></span>
+</div>
+<div class="hint">Click a contractor to show only their work; click again to add another, or hit <b>All contractors</b> to reset. Filtering only changes what you see — dates are always calculated from the full plan, so a hidden predecessor still drives its successors. Amber finish = past 15 Sep (acceptable); red = past 30 Sep (not acceptable).</div>
 
 <div id="wrap"></div>
 <div id="sum"></div>
@@ -98,6 +115,7 @@ const SRC = [
  {id:'r45',row:'31',  b:'B14',c:'B', crew:'B / Crew 2', n:'Bike parking stand near male GYM',                        d:1,  l:{t:'head'}},
  {id:'r46',row:'32',  b:'B15',c:'C', crew:'C',          n:'Add permanent Flags & poles G1',                          d:10, l:{t:'head'}}
 ];
+const NAMES={A:'Contractor A',B:'Contractor B',C:'Contractor C'};
 
 /* ---------- calendar helpers (weekend = Fri + Sat) ---------- */
 const MS=864e5;
@@ -111,7 +129,9 @@ const full=d=>d.toLocaleDateString('en-GB',{timeZone:'UTC',day:'2-digit',month:'
 
 const TASKS=SRC.filter(t=>t.id);
 const ovrStart={}, ovrDur={};
+let show=new Set(['A','B','C']);          // <-- filter state
 
+/* dates are ALWAYS computed from every task, filtered or not */
 function compute(){
   const start0=nextWD(parse(document.getElementById('pstart').value));
   const S={},F={};
@@ -137,6 +157,13 @@ function render(){
   const{S,F,dur,start0}=compute();
   const pref=parse(document.getElementById('ppref').value);
   const lim=parse(document.getElementById('plimit').value);
+  const ghost=document.getElementById('ghost').checked;
+
+  document.querySelectorAll('button.f').forEach(b=>{
+    const f=b.dataset.f;
+    b.classList.toggle('on', f==='ALL' ? show.size===3 : show.has(f));
+  });
+
   let max=start0;for(const t of TASKS) if(F[t.id]&&F[t.id]>max)max=F[t.id];
   if(lim>max)max=lim;
   const end=new Date(max.getTime()+3*MS);
@@ -156,13 +183,27 @@ function render(){
   days.forEach(d=>h+=`<th class="${isWE(d)?'we':''}${mark(d)}">${d.getUTCDate()}<br>${'SMTWTFS'[d.getUTCDay()]}</th>`);
   h+='</tr></thead><tbody>';
 
+  /* project-wide stats (unaffected by filter) */
   let bad=0,soft=0,proj=start0;
-  for(const t of SRC){
-    if(t.g){h+=`<tr class="grp"><td colspan="${cols.length+days.length}">${t.g}</td></tr>`;continue;}
+  for(const t of TASKS){const f=F[t.id];if(f>lim)bad++;else if(f>pref)soft++;if(f>proj)proj=f;}
+
+  /* filtered stats + rows */
+  let shown=0, fProj=null, body='';
+  for(let k=0;k<SRC.length;k++){
+    const t=SRC[k];
+    if(t.g){
+      const any=SRC.slice(k+1).findIndex(x=>x.g!==undefined);
+      const seg=SRC.slice(k+1, any===-1?SRC.length:k+1+any);
+      if(!seg.some(x=>show.has(x.c))) continue;
+      body+=`<tr class="grp"><td colspan="${cols.length+days.length}">${t.g}</td></tr>`;
+      continue;
+    }
+    if(!show.has(t.c)) continue;
+    shown++;
     const s=S[t.id],f=F[t.id];
+    if(!fProj||f>fProj)fProj=f;
     const over=f>lim, past=f>pref&&!over;
-    if(over)bad++; if(past)soft++; if(f>proj)proj=f;
-    h+='<tr>'
+    body+='<tr>'
       +`<td class="stick c0">${t.row}</td>`
       +`<td class="stick c1">${t.b}</td>`
       +`<td class="stick c2" title="${t.n}">${t.n}</td>`
@@ -172,19 +213,46 @@ function render(){
       +`<td class="stick c6 fin ${over?'late':(past?'soft':'')}">${fmt(f)}</td>`;
     days.forEach(d=>{
       const on=d>=s&&d<=f&&!isWE(d);
-      h+=`<td class="day ${isWE(d)?'we':''}${mark(d)}">${on?`<div class="b ${t.c}${over?' over':''}"></div>`:''}</td>`;
+      body+=`<td class="day ${isWE(d)?'we':''}${mark(d)}">${on?`<div class="b ${t.c}${over?' over':''}"></div>`:''}</td>`;
     });
-    h+='</tr>';
+    body+='</tr>';
   }
-  h+='</tbody></table>';
+  /* optional faded rows for the hidden contractors */
+  if(ghost){
+    const hid=TASKS.filter(t=>!show.has(t.c));
+    if(hid.length){
+      body+=`<tr class="grp"><td colspan="${cols.length+days.length}">OTHER CONTRACTORS (reference only)</td></tr>`;
+      for(const t of hid){
+        const s=S[t.id],f=F[t.id];
+        body+='<tr>'
+          +`<td class="stick c0">${t.row}</td><td class="stick c1">${t.b}</td>`
+          +`<td class="stick c2" title="${t.n}">${t.n}</td>`
+          +`<td class="stick c3">${t.crew}</td>`
+          +`<td class="stick c4" style="text-align:center;font-size:12px">${fmt(s)}</td>`
+          +`<td class="stick c5">${dur(t)}</td>`
+          +`<td class="stick c6" style="text-align:center;font-size:12px">${fmt(f)}</td>`;
+        days.forEach(d=>{
+          const on=d>=s&&d<=f&&!isWE(d);
+          body+=`<td class="day ${isWE(d)?'we':''}${mark(d)}">${on?`<div class="b ${t.c} ghost"></div>`:''}</td>`;
+        });
+        body+='</tr>';
+      }
+    }
+  }
+  h+=body+'</tbody></table>';
   document.getElementById('wrap').innerHTML=h;
+
+  const label=show.size===3?'all contractors':[...show].map(c=>NAMES[c]).join(' + ');
+  document.getElementById('count').textContent=
+    `${shown} of ${TASKS.length} activities shown (${label})`;
 
   const slack=Math.round((lim-proj)/MS);
   document.getElementById('sum').innerHTML=
     `Projected completion: <b>${full(proj)}</b> · Latest allowed: <b>${full(lim)}</b> · `
     +(bad>0?`<span style="color:#C00000"><b>${bad} task(s) breach the 30 Sep limit</b></span>`
            :`<span style="color:#375623"><b>Within September — ${slack} calendar days of slack</b></span>`)
-    +` · ${soft} task(s) finish after the preferred ${fmt(pref)} date (acceptable).`;
+    +` · ${soft} task(s) finish after the preferred ${fmt(pref)} date (acceptable).`
+    +(show.size<3&&fProj?`<br><span style="color:#555">Filtered view — ${label} finish${show.size>1?'':'es'} on <b>${full(fProj)}</b>.</span>`:'');
 
   document.querySelectorAll('[data-s]').forEach(el=>el.onchange=e=>{
     const id=e.target.dataset.s;if(e.target.value)ovrStart[id]=e.target.value;else delete ovrStart[id];render();});
@@ -192,6 +260,16 @@ function render(){
     const id=e.target.dataset.d;const v=parseInt(e.target.value,10);
     if(v>0)ovrDur[id]=v;else delete ovrDur[id];render();});
 }
+
+document.querySelectorAll('button.f').forEach(b=>b.onclick=()=>{
+  const f=b.dataset.f;
+  if(f==='ALL'){ show=new Set(['A','B','C']); }
+  else if(show.size===3){ show=new Set([f]); }          // first click isolates
+  else if(show.has(f)){ show.delete(f); if(!show.size) show=new Set(['A','B','C']); }
+  else { show.add(f); }
+  render();
+});
+document.getElementById('ghost').onchange=render;
 ['pstart','ppref','plimit'].forEach(k=>document.getElementById(k).onchange=render);
 document.getElementById('reset').onclick=()=>{
   for(const k in ovrStart)delete ovrStart[k];for(const k in ovrDur)delete ovrDur[k];render();};
