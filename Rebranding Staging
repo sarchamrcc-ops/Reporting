@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SAHARA Rebranding – Installation Gantt</title>
+<style>
+:root{--peach:#F8CBAD;--grey:#BFBFBF;--blue:#BDD7EE;--late:#C00000}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 Calibri,Segoe UI,Arial,sans-serif;background:#fff;color:#111}
+header{background:#C65911;color:#FCE4D6;padding:14px 18px}
+header h1{margin:0;font-size:19px;letter-spacing:.5px}
+header p{margin:4px 0 0;font-size:12px;opacity:.9}
+#bar{display:flex;gap:18px;align-items:center;padding:10px 18px;background:#F2F2F2;border-bottom:1px solid #808080;flex-wrap:wrap}
+#bar label{font-weight:bold}
+.key{display:flex;gap:6px;align-items:center}
+.sw{width:14px;height:14px;border:1px solid #808080;display:inline-block}
+button{padding:5px 12px;cursor:pointer}
+#wrap{overflow:auto;max-height:78vh;border-top:1px solid #ccc}
+table{border-collapse:collapse}
+th,td{border:1px solid #D9D9D9;padding:2px 5px;white-space:nowrap}
+thead th{position:sticky;top:0;background:#F2F2F2;z-index:3;font-size:11px}
+thead tr.m th{background:#D9D9D9}
+.stick{position:sticky;left:0;background:#fff;z-index:2}
+.c0{left:0;min-width:52px;text-align:center}
+.c1{left:52px;min-width:44px;text-align:center;font-weight:bold}
+.c2{left:96px;min-width:330px;max-width:330px;overflow:hidden;text-overflow:ellipsis}
+.c3{left:426px;min-width:112px}
+.c4{left:538px;min-width:62px;text-align:center}
+.c5{left:600px;min-width:96px;text-align:center;font-size:12px}
+thead .stick{background:#F2F2F2}
+td.day{width:20px;min-width:20px;padding:0;height:24px}
+td.we{background:#EDEDED}
+td.tgt{border-left:2px solid #C00000}
+.b{height:16px;margin:3px 1px;border:1px solid #808080;border-radius:2px}
+.b.A{background:var(--peach)}.b.B{background:var(--grey)}.b.C{background:var(--blue)}
+.b.over{outline:2px solid var(--late)}
+input[type=date]{font:inherit;width:108px;border:1px solid #bbb;padding:1px}
+input[type=number]{font:inherit;width:52px;border:1px solid #bbb;padding:1px;text-align:center}
+input.ovr{background:#FFF2CC;border-color:#BF8F00;font-weight:bold}
+.fin{font-weight:bold}
+.fin.late{color:var(--late)}
+tr.grp td{background:#C65911;color:#FCE4D6;font-weight:bold;font-size:14px}
+#sum{padding:10px 18px;background:#FCE4D6;font-size:13px;border-top:1px solid #808080}
+#sum b{color:#C65911}
+.hint{font-size:11px;color:#555;padding:6px 18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>SAHARA — Rebranding Installation Schedule</h1>
+  <p>Working week Sun–Thu · Friday &amp; Saturday skipped automatically · 2 crews per contractor · same batch (B#) starts together</p>
+</header>
+
+<div id="bar">
+  <span><label>Project start:</label> <input type="date" id="pstart" value="2026-08-24"></span>
+  <span><label>Target finish:</label> <input type="date" id="ptarget" value="2026-09-15"></span>
+  <button id="reset">Reset all overrides</button>
+  <span class="key"><i class="sw" style="background:#F8CBAD"></i>Contractor A</span>
+  <span class="key"><i class="sw" style="background:#BFBFBF"></i>Contractor B</span>
+  <span class="key"><i class="sw" style="background:#BDD7EE"></i>Contractor C</span>
+  <span class="key"><i class="sw" style="background:#FFF2CC;border-color:#BF8F00"></i>manually overridden</span>
+</div>
+<div class="hint">Edit any <b>Start</b> to pin a task (turns yellow) — every task that follows it shifts with it. Edit <b>Days</b> to re-flow the chain. Clear a start field to hand it back to the dependency.</div>
+
+<div id="wrap"></div>
+<div id="sum"></div>
+
+<script>
+/* ---------- data: id, row, batch, contractor, name, duration, link ---------- */
+/* link: {t:'head'} chain start | {t:'after',id} starts next working day after id finishes
+         {t:'same',id} starts the same day as id (same batch)                              */
+const SRC = [
+ {g:'01  INTERNAL'},
+ {id:'r14',row:'1.1', b:'B1', c:'A', n:'Add Bracket on hang sign -10x30',                        d:1,  l:{t:'head'},          crew:'A / Crew 2'},
+ {id:'r15',row:'1.2', b:'B2', c:'A', n:'Change Wayfinding Hang sign sticker-200x30',             d:3,  l:{t:'after',id:'r14'}, crew:'A / Crew 2'},
+ {id:'r16',row:'1.3', b:'B3', c:'A', n:'Projector (Flag) sign - Adding Brackets-40x5',           d:1,  l:{t:'head'},          crew:'A / Crew 1'},
+ {id:'r17',row:'1.4', b:'B3', c:'A', n:'Add Wall mounted sign - new sign 40x40',                 d:1,  l:{t:'same',id:'r16'},  crew:'A / Crew 1'},
+ {id:'r18',row:'1.5', b:'B4', c:'A', n:'Gates number internal -60x60',                           d:2,  l:{t:'after',id:'r43'}, crew:'A / Crew 2'},
+ {id:'r23',row:'10',  b:'B5', c:'B', n:'Change Sahara mall logo_reception wall',                  d:1,  l:{t:'head'},          crew:'B / Crew 1'},
+ {id:'r24',row:'11',  b:'B5', c:'B', n:'Change Sahara mall logo_beside elevator',                 d:1,  l:{t:'same',id:'r23'},  crew:'B / Crew 1'},
+ {id:'r25',row:'12',  b:'B5', c:'B', n:'Change administration office working time sign',          d:1,  l:{t:'same',id:'r23'},  crew:'B / Crew 1'},
+ {id:'r26',row:'13',  b:'B5', c:'B', n:'Add acrylic wayfinding sign On Doors',                    d:1,  l:{t:'same',id:'r23'},  crew:'B / Crew 1'},
+ {id:'r27',row:'14',  b:'B4', c:'A', n:'Add counter for Train rent',                              d:1,  l:{t:'same',id:'r18'},  crew:'A / Crew 1'},
+ {id:'r30',row:'17',  b:'B6', c:'B', n:'Install 3D black acrylic on sticker- GYM',                d:2,  l:{t:'after',id:'r23'}, crew:'B / Crew 1'},
+ {id:'r31',row:'18',  b:'B7', c:'A', n:'Add Strip to the emergency door',                         d:5,  l:{t:'after',id:'r38'}, crew:'A / Crew 2'},
+ {g:'02  EXTERNAL'},
+ {id:'r33',row:'19',  b:'B8', c:'A', n:'Add big logo signage on glass entrance',                  d:6,  l:{t:'after',id:'r16'}, crew:'A / Crew 1'},
+ {id:'r34',row:'20',  b:'B9', c:'A', n:'Remove seethrow on glass above gates 1&6',                d:7,  l:{t:'after',id:'r37'}, crew:'A / Crew 1'},
+ {id:'r37',row:'23',  b:'B10',c:'A', n:'Gates number sign (outside) 170x6',                       d:10, l:{t:'after',id:'r33'}, crew:'A / Crew 1'},
+ {id:'r38',row:'24',  b:'B11',c:'A', n:'Pylon adjustment-change logo',                            d:3,  l:{t:'after',id:'r15'}, crew:'A / Crew 2'},
+ {id:'r40',row:'26',  b:'B12',c:'A', n:'Change Wayfinding parking sign sticker',                  d:5,  l:{t:'after',id:'r31'}, crew:'A / Crew 2'},
+ {id:'r43',row:'29',  b:'B13',c:'A', n:'ACP Cladding cover to hide driver waiting room on gate 10',d:5, l:{t:'after',id:'r40'}, crew:'A / Crew 2'},
+ {id:'r44',row:'30',  b:'B5', c:'B', n:'Change Sahara mall logo managment office (outdoor)',      d:1,  l:{t:'same',id:'r23'},  crew:'B / Crew 1'},
+ {id:'r45',row:'31',  b:'B14',c:'B', n:'Bike parking stand near male GYM',                        d:1,  l:{t:'head'},          crew:'B / Crew 2'},
+ {id:'r46',row:'32',  b:'B15',c:'C', n:'Add permanent Flags & poles G1',                          d:10, l:{t:'head'},          crew:'C'}
+];
+
+/* ---------- calendar helpers (weekend = Fri + Sat) ---------- */
+const MS=864e5;
+const iso=d=>d.toISOString().slice(0,10);
+const parse=s=>{const[y,m,dd]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,dd));};
+const isWE=d=>{const w=d.getUTCDay();return w===5||w===6;};
+const nextWD=d=>{let x=new Date(d.getTime());while(isWE(x))x=new Date(x.getTime()+MS);return x;};
+const addWD=(s,n)=>{let x=nextWD(s);for(let i=1;i<n;i++){do{x=new Date(x.getTime()+MS);}while(isWE(x));}return x;};
+const fmt=d=>d.toLocaleDateString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short'});
+
+const TASKS=SRC.filter(t=>t.id);
+const ovrStart={}, ovrDur={};
+
+function compute(){
+  const start0=nextWD(parse(document.getElementById('pstart').value));
+  const S={},F={};
+  const dur=t=>Math.max(1,ovrDur[t.id]??t.d);
+  let pending=TASKS.slice(), guard=0;
+  while(pending.length&&guard++<50){
+    const rest=[];
+    for(const t of pending){
+      let s=null;
+      if(ovrStart[t.id]) s=nextWD(parse(ovrStart[t.id]));
+      else if(t.l.t==='head') s=start0;
+      else if(t.l.t==='after'&&F[t.l.id]) s=nextWD(new Date(F[t.l.id].getTime()+MS));
+      else if(t.l.t==='same'&&S[t.l.id]) s=S[t.l.id];
+      if(s){S[t.id]=s;F[t.id]=addWD(s,dur(t));}else rest.push(t);
+    }
+    if(rest.length===pending.length)break;
+    pending=rest;
+  }
+  return{S,F,dur,start0};
+}
+
+function render(){
+  const{S,F,dur,start0}=compute();
+  const tgt=parse(document.getElementById('ptarget').value);
+  let max=start0;for(const t of TASKS) if(F[t.id]&&F[t.id]>max)max=F[t.id];
+  if(tgt>max)max=tgt;
+  const end=new Date(max.getTime()+3*MS);
+  const days=[];for(let d=new Date(start0.getTime());d<=end;d=new Date(d.getTime()+MS))days.push(new Date(d.getTime()));
+
+  const cols=[['c0','#'],['c1','Batch'],['c2','Activity'],['c3','Start'],['c4','Days'],['c5','Finish']];
+  let h='<table><thead><tr class="m">';
+  cols.forEach(([c,l])=>h+=`<th class="stick ${c}" rowspan="2">${l}</th>`);
+  let i=0;
+  while(i<days.length){
+    let j=i;while(j<days.length&&days[j].getUTCMonth()===days[i].getUTCMonth())j++;
+    h+=`<th colspan="${j-i}">${days[i].toLocaleDateString('en-GB',{timeZone:'UTC',month:'long',year:'numeric'})}</th>`;
+    i=j;
+  }
+  h+='</tr><tr>';
+  days.forEach(d=>h+=`<th class="${isWE(d)?'we':''}${iso(d)===iso(tgt)?' tgt':''}">${d.getUTCDate()}<br>${'SMTWTFS'[d.getUTCDay()]}</th>`);
+  h+='</tr></thead><tbody>';
+
+  let late=0,proj=start0;
+  for(const t of SRC){
+    if(t.g){h+=`<tr class="grp"><td colspan="${cols.length+days.length}">${t.g}</td></tr>`;continue;}
+    const s=S[t.id],f=F[t.id];const over=f>tgt;if(over)late++;if(f>proj)proj=f;
+    h+='<tr>'
+      +`<td class="stick c0">${t.row}</td>`
+      +`<td class="stick c1">${t.b}</td>`
+      +`<td class="stick c2" title="${t.n} — ${t.crew}">${t.n}</td>`
+      +`<td class="stick c3"><input type="date" data-s="${t.id}" class="${ovrStart[t.id]?'ovr':''}" value="${iso(s)}"></td>`
+      +`<td class="stick c4"><input type="number" min="1" data-d="${t.id}" class="${ovrDur[t.id]!=null?'ovr':''}" value="${dur(t)}"></td>`
+      +`<td class="stick c5 fin ${over?'late':''}">${fmt(f)}</td>`;
+    days.forEach(d=>{
+      const on=d>=s&&d<=f&&!isWE(d);
+      h+=`<td class="day ${isWE(d)?'we':''}${iso(d)===iso(tgt)?' tgt':''}">${on?`<div class="b ${t.c}${over?' over':''}"></div>`:''}</td>`;
+    });
+    h+='</tr>';
+  }
+  h+='</tbody></table>';
+  document.getElementById('wrap').innerHTML=h;
+
+  const diff=Math.round((proj-tgt)/MS);
+  document.getElementById('sum').innerHTML=
+    `Projected completion: <b>${proj.toLocaleDateString('en-GB',{timeZone:'UTC',day:'2-digit',month:'long',year:'numeric'})}</b> · `
+    +`Target: <b>${tgt.toLocaleDateString('en-GB',{timeZone:'UTC',day:'2-digit',month:'long',year:'numeric'})}</b> · `
+    +(diff>0?`<span style="color:#C00000"><b>${diff} calendar days late</b> — ${late} task(s) finish after target</span>`
+            :`<span style="color:#375623"><b>On target</b></span>`);
+
+  document.querySelectorAll('[data-s]').forEach(el=>el.onchange=e=>{
+    const id=e.target.dataset.s;if(e.target.value)ovrStart[id]=e.target.value;else delete ovrStart[id];render();});
+  document.querySelectorAll('[data-d]').forEach(el=>el.onchange=e=>{
+    const id=e.target.dataset.d;const v=parseInt(e.target.value,10);
+    if(v>0)ovrDur[id]=v;else delete ovrDur[id];render();});
+}
+document.getElementById('pstart').onchange=render;
+document.getElementById('ptarget').onchange=render;
+document.getElementById('reset').onclick=()=>{
+  for(const k in ovrStart)delete ovrStart[k];for(const k in ovrDur)delete ovrDur[k];render();};
+render();
+</script>
+</body>
+</html>
