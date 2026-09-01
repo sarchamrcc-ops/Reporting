@@ -1,0 +1,965 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Executive Project Dashboard — 30 August 2026</title>
+  <style>
+    :root {
+      --navy-950: #0b1729;
+      --navy-900: #10223a;
+      --navy-800: #173250;
+      --ink: #17243a;
+      --muted: #67758a;
+      --line: #dce3eb;
+      --surface: #ffffff;
+      --surface-soft: #f4f7fa;
+      --page: #e8edf2;
+      --blue: #315fbd;
+      --blue-soft: #edf3ff;
+      --teal: #167b72;
+      --teal-soft: #eaf7f5;
+      --delay: #a33a31;
+      --delay-soft: #fff2ef;
+      --gold: #b37b25;
+      --shadow: 0 22px 52px rgba(24, 39, 61, 0.12);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: var(--page); }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(49, 95, 189, 0.10), transparent 28rem),
+        radial-gradient(circle at 96% 8%, rgba(22, 123, 114, 0.09), transparent 30rem),
+        var(--page);
+      font-family: Aptos, "Segoe UI", Arial, sans-serif;
+      font-variant-numeric: tabular-nums lining-nums;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .shell {
+      width: min(1560px, calc(100% - 40px));
+      margin: 26px auto 44px;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      padding: 27px 31px 25px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--navy-950), var(--navy-800));
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .masthead .eyebrow {
+      margin-bottom: 8px;
+      color: #aebed1;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .masthead h1 {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 46px);
+      font-weight: 690;
+      letter-spacing: -0.035em;
+      line-height: 1.04;
+    }
+
+    .masthead p {
+      margin: 11px 0 0;
+      color: #c6d1df;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .reporting-date {
+      flex: 0 0 auto;
+      min-width: 210px;
+      padding: 14px 17px 13px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.06);
+      text-align: right;
+    }
+
+    .reporting-date span {
+      display: block;
+      color: #9fb0c5;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .reporting-date strong {
+      display: block;
+      margin-top: 5px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 680;
+    }
+
+    .context-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 17px 3px 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .context-line strong { color: var(--ink); }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .project-card {
+      --accent: var(--blue);
+      --accent-soft: var(--blue-soft);
+      position: relative;
+      display: flex;
+      min-width: 0;
+      overflow: hidden;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid rgba(20, 45, 72, 0.11);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .project-card.teal {
+      --accent: var(--teal);
+      --accent-soft: var(--teal-soft);
+    }
+
+    .project-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: var(--accent);
+    }
+
+    .project-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 27px 28px 23px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .project-header .eyebrow {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .project-header h2 {
+      margin: 3px 0 0;
+      color: var(--navy-900);
+      font-size: 30px;
+      font-weight: 760;
+      letter-spacing: -0.03em;
+    }
+
+    .phase-pill {
+      padding: 8px 11px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .project-content {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      padding: 24px 28px 26px;
+    }
+
+    .metric-section + .metric-section {
+      margin-top: 27px;
+      padding-top: 27px;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .section-index {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      place-items: center;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .section-title h3 {
+      margin: 0;
+      color: var(--navy-900);
+      font-size: 17px;
+      font-weight: 720;
+      letter-spacing: -0.01em;
+    }
+
+    .kpi-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .cost-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .duration-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .kpi-card {
+      min-width: 0;
+      padding: 16px 16px 17px;
+      background: var(--surface-soft);
+      border: 1px solid transparent;
+      border-radius: var(--radius-lg);
+    }
+
+    .kpi-card.delay {
+      color: var(--delay);
+      background: var(--delay-soft);
+      border-color: rgba(163, 58, 49, 0.12);
+    }
+
+    .kpi-label {
+      min-height: 28px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 760;
+      letter-spacing: 0.055em;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+
+    .kpi-card.delay .kpi-label { color: #8c5a54; }
+
+    .kpi-value {
+      margin-top: 8px;
+      color: var(--navy-900);
+      font-size: clamp(16px, 1.5vw, 22px);
+      font-weight: 740;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .kpi-card.delay .kpi-value { color: var(--delay); }
+
+    .compact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .compact-metric {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-width: 0;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fff;
+    }
+
+    .compact-metric span {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .compact-metric strong {
+      flex: 0 0 auto;
+      color: var(--navy-900);
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      overflow: hidden;
+      margin-top: 10px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+
+    .timeline-cell {
+      padding: 11px 12px 12px;
+      background: #fff;
+    }
+
+    .timeline-cell span {
+      display: block;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .timeline-cell strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--navy-900);
+      font-size: 13px;
+      font-weight: 710;
+    }
+
+    .forecast-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 10px;
+      padding: 13px 15px;
+      color: #714a1f;
+      background: #fff8e8;
+      border: 1px solid #f0ddb7;
+      border-radius: var(--radius-md);
+    }
+
+    .forecast-note span {
+      font-size: 11px;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .forecast-note strong {
+      flex: 0 0 auto;
+      color: #704817;
+      font-size: 16px;
+      font-weight: 760;
+    }
+
+
+    .metric-section.risk-section {
+      margin-top: auto;
+    }
+
+    .risk-section .section-title {
+      margin-bottom: 14px;
+    }
+
+    .risk-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .risk-item {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      min-width: 0;
+      overflow: hidden;
+      background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--accent) 5%, #ffffff) 0%,
+        #ffffff 36%
+      );
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+
+    .risk-number {
+      display: grid;
+      min-height: 72px;
+      place-items: center;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-right: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+    }
+
+    .risk-copy {
+      min-width: 0;
+      padding: 13px 15px 14px;
+      color: var(--ink);
+      font-size: 12.5px;
+      line-height: 1.48;
+    }
+
+    .risk-copy strong {
+      color: var(--navy-900);
+      font-weight: 780;
+    }
+
+    .supporting-data {
+      margin: 0 28px 27px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #fff;
+    }
+
+    .supporting-data summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 15px 16px;
+      color: var(--navy-900);
+      background: #fbfcfd;
+      cursor: pointer;
+      list-style: none;
+      font-size: 12px;
+      font-weight: 720;
+      user-select: none;
+    }
+
+    .supporting-data summary::-webkit-details-marker { display: none; }
+
+    .supporting-data summary > span:first-child {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .summary-icon {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      background: var(--accent-soft);
+    }
+
+    .summary-icon::before,
+    .summary-icon::after {
+      content: "";
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 9px;
+      height: 1.5px;
+      background: var(--accent);
+      transform: translate(-50%, -50%);
+      transition: transform 160ms ease;
+    }
+
+    .summary-icon::after { transform: translate(-50%, -50%) rotate(90deg); }
+    .supporting-data[open] .summary-icon::after { transform: translate(-50%, -50%) rotate(0); }
+
+    .toggle-label {
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 820;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .toggle-label::after { content: "Expand"; }
+    .supporting-data[open] .toggle-label::after { content: "Collapse"; }
+
+    .supporting-inner {
+      padding: 0 16px 15px;
+      border-top: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 11px;
+    }
+
+    th {
+      padding: 12px 6px 8px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.11em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    th:last-child, td:last-child { text-align: right; }
+
+    td {
+      padding: 9px 6px;
+      color: var(--ink);
+      border-top: 1px solid #edf1f5;
+      line-height: 1.35;
+    }
+
+    td:last-child {
+      color: var(--navy-900);
+      font-weight: 680;
+    }
+
+    .data-note {
+      display: inline-block;
+      margin-left: 7px;
+      padding: 2px 6px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 999px;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: 1px;
+    }
+
+    .footer-note {
+      margin: 16px 4px 0;
+      color: #758397;
+      font-size: 10px;
+      line-height: 1.5;
+      text-align: right;
+    }
+
+    @media (max-width: 1120px) {
+      .project-grid { grid-template-columns: 1fr; }
+      .kpi-value { font-size: 22px; }
+    }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 20px, 1560px); margin-top: 10px; }
+      .masthead { align-items: flex-start; flex-direction: column; padding: 22px; }
+      .reporting-date { width: 100%; text-align: left; }
+      .context-line { align-items: flex-start; flex-direction: column; margin-inline: 2px; }
+      .project-header, .project-content { padding-left: 18px; padding-right: 18px; }
+      .supporting-data { margin-left: 18px; margin-right: 18px; }
+      .cost-grid, .duration-grid, .compact-grid { grid-template-columns: 1fr; }
+      .timeline { grid-template-columns: 1fr; }
+      .forecast-note { align-items: flex-start; flex-direction: column; gap: 5px; }
+      .risk-item { grid-template-columns: 36px minmax(0, 1fr); }
+      .risk-copy { font-size: 12px; }
+    }
+
+    @media print {
+      @page { size: A4 landscape; margin: 9mm; }
+      html, body { background: #fff; }
+      .shell { width: 100%; margin: 0; }
+      .masthead, .project-card { box-shadow: none; }
+      .masthead { border-radius: 12px; }
+      .project-grid { gap: 12px; }
+      .project-card { border-radius: 12px; break-inside: avoid; }
+      .project-header { padding: 16px 18px 13px; }
+      .project-content { padding: 14px 18px 16px; }
+      .metric-section + .metric-section { margin-top: 15px; padding-top: 15px; }
+      .kpi-card { padding: 10px 11px; }
+      .kpi-value { font-size: 15px; }
+      .compact-metric { padding: 8px 10px; }
+      .compact-metric strong { font-size: 14px; }
+      .risk-list { gap: 6px; }
+      .risk-item { grid-template-columns: 30px minmax(0, 1fr); }
+      .risk-number { min-height: 48px; font-size: 10px; }
+      .risk-copy { padding: 7px 9px 8px; font-size: 8.7px; line-height: 1.28; }
+      .supporting-data { margin: 0 18px 16px; }
+      .footer-note { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <div class="eyebrow">Board of Directors · Project Update</div>
+        <h1>Executive Project Dashboard</h1>
+        <p>Client perspective: Design + Supervision + Construction</p>
+      </div>
+      <div class="reporting-date">
+        <span>Reporting date</span>
+        <strong>30 August 2026</strong>
+      </div>
+    </header>
+
+    <div class="context-line">
+      <span><strong>Executive brief comparison</strong> · Projects shown independently, side by side</span>
+      <span>Supporting project data is collapsed by default</span>
+    </div>
+
+    <section class="project-grid" aria-label="Executive project comparison">
+      
+    <article class="project-card blue">
+      <header class="project-header">
+        <div>
+          <div class="eyebrow">Project</div>
+          <h2>BMH</h2>
+        </div>
+        <span class="phase-pill">Construction</span>
+      </header>
+
+      <div class="project-content">
+        <section class="metric-section">
+          <div class="section-title">
+            <span class="section-index">01</span>
+            <h3>Cost</h3>
+          </div>
+          <div class="kpi-grid cost-grid">
+            
+          <div class="kpi-card neutral">
+            <div class="kpi-label">Actual cumulative</div>
+            <div class="kpi-value">SAR 49,717,955.29</div>
+          </div>
+          <div class="kpi-card neutral">
+            <div class="kpi-label">Planned cumulative</div>
+            <div class="kpi-value">SAR 62,396,050.70</div>
+          </div>
+          <div class="kpi-card delay">
+            <div class="kpi-label">Delay amount</div>
+            <div class="kpi-value">SAR 12,678,095.41</div>
+          </div>
+          </div>
+          <div class="compact-grid">
+            
+          <div class="compact-metric">
+            <span>Delay % of actual (of start)</span>
+            <strong>20%</strong>
+          </div>
+          <div class="compact-metric">
+            <span>Enhancement required (till end)</span>
+            <strong>12%</strong>
+          </div>
+          </div>
+        </section>
+
+        <section class="metric-section duration-section">
+          <div class="section-title">
+            <span class="section-index">02</span>
+            <h3>Duration</h3>
+          </div>
+          <div class="kpi-grid duration-grid">
+            
+          <div class="kpi-card neutral">
+            <div class="kpi-label">Cumulative duration</div>
+            <div class="kpi-value">322 days</div>
+          </div>
+          <div class="kpi-card delay">
+            <div class="kpi-label">Delay duration</div>
+            <div class="kpi-value">65 days</div>
+          </div>
+          </div>
+          <div class="compact-grid">
+            
+          <div class="compact-metric">
+            <span>Delay % of actual (of start)</span>
+            <strong>20%</strong>
+          </div>
+          <div class="compact-metric">
+            <span>Enhancement required (till end)</span>
+            <strong>14%</strong>
+          </div>
+          </div>
+          
+      <div class="timeline" aria-label="Project reference dates">
+        
+          <div class="timeline-cell">
+            <span>Start</span>
+            <strong>13 Oct 2025</strong>
+          </div>
+          <div class="timeline-cell">
+            <span>Today</span>
+            <strong>31 Aug 2026</strong>
+          </div>
+          <div class="timeline-cell">
+            <span>End date</span>
+            <strong>12 Dec 2027</strong>
+          </div>
+      </div>
+          
+        <div class="forecast-note">
+          <span>New project end date (if not recovered)</span>
+          <strong>15 Feb 2028</strong>
+        </div>
+        </section>
+
+        <section class="metric-section risk-section" aria-label="BMH top construction risks">
+          <div class="section-title">
+            <span class="section-index">03</span>
+            <h3>Top 3 risks affecting construction progress</h3>
+          </div>
+          <ol class="risk-list">
+            <li class="risk-item">
+              <span class="risk-number">1</span>
+              <div class="risk-copy">Restricted logistics access in Makkah and labor shortage during Hajj season.</div>
+            </li>
+            <li class="risk-item">
+              <span class="risk-number">2</span>
+              <div class="risk-copy">Non-compliance of FLS installation with related approved drawings / codes (fire escape stair lacks a safe exit route due to neighboring encroachment, level differences, and excavation support works removing the side exit corridor).</div>
+            </li>
+            <li class="risk-item">
+              <span class="risk-number">3</span>
+              <div class="risk-copy">Delay in renewing regulatory permits / delay in renewal of the construction permit due to façade approval from the Royal Commission in Makkah.</div>
+            </li>
+          </ol>
+        </section>
+      </div>
+
+      <details class="supporting-data">
+        <summary>
+          <span>
+            <span class="summary-icon" aria-hidden="true"></span>
+            Supporting project data
+          </span>
+          <span class="toggle-label" aria-hidden="true"></span>
+        </summary>
+        <div class="supporting-inner">
+          <table>
+            <thead>
+              <tr><th>Metric</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              
+          <tr>
+            <td>BAC @ Mar 2026</td>
+            <td>SAR 157,297,243.74</td>
+          </tr>
+          <tr>
+            <td>BAC @ Aug 2026</td>
+            <td>SAR 161,378,835.00</td>
+          </tr>
+          <tr>
+            <td>AC</td>
+            <td>SAR 49,717,955.29</td>
+          </tr>
+          <tr>
+            <td>PV</td>
+            <td>SAR 62,396,050.70</td>
+          </tr>
+          <tr>
+            <td>SPI</td>
+            <td>79.68%</td>
+          </tr>
+          <tr>
+            <td>Cost Growth @ Aug 2026</td>
+            <td>2.59%</td>
+          </tr>
+          <tr>
+            <td>Cost Growth @ Dec 2027</td>
+            <td>6.49%</td>
+          </tr>
+          <tr>
+            <td>EAC @ Dec 2027</td>
+            <td>SAR 171,582,813.15</td>
+          </tr>
+          <tr>
+            <td>Elapsed Days</td>
+            <td>322 days</td>
+          </tr>
+          <tr>
+            <td>Planned Progress</td>
+            <td>23.20%</td>
+          </tr>
+          <tr>
+            <td>Actual Progress</td>
+            <td>16.80%</td>
+          </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </article>
+      
+    <article class="project-card teal">
+      <header class="project-header">
+        <div>
+          <div class="eyebrow">Project</div>
+          <h2>RBD</h2>
+        </div>
+        <span class="phase-pill">Construction</span>
+      </header>
+
+      <div class="project-content">
+        <section class="metric-section">
+          <div class="section-title">
+            <span class="section-index">01</span>
+            <h3>Cost</h3>
+          </div>
+          <div class="kpi-grid cost-grid">
+            
+          <div class="kpi-card neutral">
+            <div class="kpi-label">Actual cumulative</div>
+            <div class="kpi-value">SAR 22,103,287.00</div>
+          </div>
+          <div class="kpi-card neutral">
+            <div class="kpi-label">Planned cumulative</div>
+            <div class="kpi-value">SAR 26,491,059.33</div>
+          </div>
+          <div class="kpi-card delay">
+            <div class="kpi-label">Delay amount</div>
+            <div class="kpi-value">SAR 4,387,772.33</div>
+          </div>
+          </div>
+          <div class="compact-grid">
+            
+          <div class="compact-metric">
+            <span>Delay % of actual (of start)</span>
+            <strong>17%</strong>
+          </div>
+          <div class="compact-metric">
+            <span>Enhancement required (till end)</span>
+            <strong>1%</strong>
+          </div>
+          </div>
+        </section>
+
+        <section class="metric-section duration-section">
+          <div class="section-title">
+            <span class="section-index">02</span>
+            <h3>Duration</h3>
+          </div>
+          <div class="kpi-grid duration-grid">
+            
+          <div class="kpi-card neutral">
+            <div class="kpi-label">Cumulative duration</div>
+            <div class="kpi-value">120 days</div>
+          </div>
+          <div class="kpi-card delay">
+            <div class="kpi-label">Delay duration</div>
+            <div class="kpi-value">20 days</div>
+          </div>
+          </div>
+          <div class="compact-grid">
+            
+          <div class="compact-metric">
+            <span>Delay % of actual (of start)</span>
+            <strong>17%</strong>
+          </div>
+          <div class="compact-metric">
+            <span>Enhancement required (till end)</span>
+            <strong>3%</strong>
+          </div>
+          </div>
+          
+          
+        </section>
+
+        <section class="metric-section risk-section" aria-label="RBD top construction risks">
+          <div class="section-title">
+            <span class="section-index">03</span>
+            <h3>Top 3 risks affecting construction progress</h3>
+          </div>
+          <ol class="risk-list">
+            <li class="risk-item">
+              <span class="risk-number">1</span>
+              <div class="risk-copy"><strong>Geotechnical Conditions During Excavation:</strong> Excavation completion delay due to unexpected shoring issues and site conditions, including outstanding site-enabling interfaces.</div>
+            </li>
+            <li class="risk-item">
+              <span class="risk-number">2</span>
+              <div class="risk-copy"><strong>External Interruption:</strong> Interruption or emergency involving nearby utilities, roads, or Metro-related infrastructure.</div>
+            </li>
+            <li class="risk-item">
+              <span class="risk-number">3</span>
+              <div class="risk-copy"><strong>Material Approval:</strong> Delay in approval of the waterproofing system.</div>
+            </li>
+          </ol>
+        </section>
+      </div>
+
+      <details class="supporting-data">
+        <summary>
+          <span>
+            <span class="summary-icon" aria-hidden="true"></span>
+            Supporting project data
+          </span>
+          <span class="toggle-label" aria-hidden="true"></span>
+        </summary>
+        <div class="supporting-inner">
+          <table>
+            <thead>
+              <tr><th>Metric</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              
+          <tr>
+            <td>BAC @ May 2026</td>
+            <td>SAR 428,657,918.00</td>
+          </tr>
+          <tr>
+            <td>BAC @ Aug 2026</td>
+            <td>SAR 428,657,918.00</td>
+          </tr>
+          <tr>
+            <td>AC</td>
+            <td>SAR 22,103,287.00</td>
+          </tr>
+          <tr>
+            <td>PV<span class="data-note">After Recovery</span></td>
+            <td>SAR 26,491,059.33</td>
+          </tr>
+          <tr>
+            <td>SPI</td>
+            <td>83.44%</td>
+          </tr>
+          <tr>
+            <td>Cost Growth @ Aug 2026</td>
+            <td>0.00%</td>
+          </tr>
+          <tr>
+            <td>Cost Growth @ Dec 2027</td>
+            <td>0.00%</td>
+          </tr>
+          <tr>
+            <td>EAC @ Dec 2027</td>
+            <td>SAR 428,657,918.00</td>
+          </tr>
+          <tr>
+            <td>Elapsed Days</td>
+            <td>120 days</td>
+          </tr>
+          <tr>
+            <td>Planned Progress</td>
+            <td>6.40%</td>
+          </tr>
+          <tr>
+            <td>Actual Progress</td>
+            <td>1.80%</td>
+          </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </article>
+    </section>
+
+    <p class="footer-note">Figures are reproduced from the executive brief; risk statements are reproduced from the supplied risk summary. No cross-project aggregation is applied.</p>
+  </main>
+</body>
+</html>
